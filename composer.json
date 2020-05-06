@@ -1,21 +1,28 @@
 {
-    "name": "rwandabuild/murugo_api_auth",
-    "description": "Package that will be used for Murugo auth to all 3rd party laravel projects with only API structure",
-    "type": "library",
-    "license": "MIT",
-    "authors": [
-        {
-            "name": "Uwe Aime Van",
-            "email": "uweaime@gmail.com"
-        }
-    ],
-    "minimum-stability": "dev",
-    "require": {
-        "guzzlehttp/guzzle": "^6.5"
-    },
-    "autoload": {
-        "psr-4": {
-            "RwandaBuild\\MurugoAuth\\": "src/"
-        }
+  "name": "rwandabuild/murugo_api_auth",
+  "description": "Package that will be used for Murugo auth to all 3rd party laravel projects with only API structure",
+  "type": "library",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Uwe Aime Van",
+      "email": "uweaime@gmail.com"
     }
+  ],
+  "minimum-stability": "dev",
+  "require": {
+    "guzzlehttp/guzzle": "^6.5"
+  },
+  "autoload": {
+    "psr-4": {
+      "RwandaBuild\\MurugoAuth\\": "src/"
+    }
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "RwandaBuild\\MurugoAuth\\MurugoAuthServiceProvider"
+      ]
+    }
+  }
 }
