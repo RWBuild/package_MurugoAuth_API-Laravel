@@ -10,10 +10,13 @@
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
-Route::get('/api', function(){
+Route::get('/api', function () {
     return "Test API routes";
 });
 
-Route::post('/murugo-auth', 'AuthenticationController@getMurugoResponse')->name('murugo-auth');
-Route::get('/authenticate-user', 'AuthenticationController@authenticateUser')->name('authenticate-user');
-Route::get('/logout', 'AuthenticationController@logoutUser')->name('logout');
+Route::group(['namespace' => 'RwandaBuild\MurugoAuth\Http\Controllers'], function () {
+    Route::post('/murugo-auth', 'AuthenticationController@getMurugoResponse')->name('murugo-auth');
+    Route::get('/authenticate-user', 'AuthenticationController@authenticateUser')->name('authenticate-user');
+    Route::get('/logout', 'AuthenticationController@logoutUser')->name('logout');
+});
+
