@@ -1,6 +1,6 @@
 {
   "name": "rwandabuild/murugo_api_auth",
-  "description": "Package that will be used for Murugo auth to all 3rd party laravel projects with only API structure",
+  "description": "Package that will use Murugo auth to all 3rd party laravel projects with only API structure",
   "type": "library",
   "license": "MIT",
   "authors": [
