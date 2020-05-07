@@ -15,8 +15,8 @@ Route::get('/api', function () {
 });
 
 Route::group(['namespace' => 'RwandaBuild\MurugoAuth\Http\Controllers'], function () {
-    Route::post('/murugo-auth', 'AuthenticationController@getMurugoResponse')->name('murugo-auth');
-    Route::get('/authenticate-user', 'AuthenticationController@authenticateUser')->name('authenticate-user');
-    Route::get('/logout', 'AuthenticationController@logoutUser')->name('logout');
+    Route::post('/api/murugo-auth', 'AuthenticationController@getMurugoResponse')->name('murugo-auth');
+    Route::get('/api/authenticate-user', 'AuthenticationController@authenticateUser')->name('authenticate-user');
+    Route::get('/api/logout', 'AuthenticationController@logoutUser')->name('logout');
 });
 
