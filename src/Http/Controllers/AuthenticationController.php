@@ -25,7 +25,7 @@ class AuthenticationController extends Controller
             $userObject = User::where('murugo_user_id', '=', $request->murugo_user_id)->first();
             if (!$userObject) {
                 //Save user in database
-                $this->saveUser($request);
+                return $this->saveUser($request);
             }
             $userId = $userObject->id;
             $token = $userObject->token;
@@ -34,13 +34,13 @@ class AuthenticationController extends Controller
 
             if (!$checkUser) {
                 //Save user in database
-                $this->saveUser($request);
+                return $this->saveUser($request);
             }
             //Update the user with new access_token
             DB::table('users')->where('id', $userId)
                 ->update(['token' => $request->murugo_access_token, 'token_expires_at' => $request->expires_at]);
 
-            return response(['response' => 'SUCCESS'], 200);
+            return response(['response' => 'DONE'], 200);
         }
     }
 
