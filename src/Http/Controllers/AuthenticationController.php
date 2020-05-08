@@ -6,8 +6,6 @@ use Illuminate\Http\Request;
 use App\User;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 
@@ -21,28 +19,22 @@ class AuthenticationController extends Controller
      */
     public function getMurugoResponse(Request $request)
     {
-        Log::info("Murugo Object" . $request);
         if (!empty($request->all())) {
 
             //Grab object
             $userObject = User::where('murugo_user_id', '=', $request->murugo_user_id)->first();
             if (!$userObject) {
-                return response(['response' => 'User not found'], 404);
+                //Save user in database
+                $this->saveUser($request);
             }
             $userId = $userObject->id;
             $token = $userObject->token;
 
-            $checkUser = $this->checkUSerExisting($request->murugo_user_id, $token);
+            $checkUser = $this->checkUserExisting($request->murugo_user_id, $token);
 
             if (!$checkUser) {
-                $user = new User();
-                $user->name = $request->murugo_user_account_name;
-                $user->email = $request->murugo_user_account_email;
-                $user->murugo_user_id = $request->murugo_user_id;
-                $user->token = $request->murugo_access_token;
-                $user->token_expires_at = $request->expires_at;
-                $user->save();
-                return response(['response' => $user], 200);
+                //Save user in database
+                $this->saveUser($request);
             }
             //Update the user with new access_token
             DB::table('users')->where('id', $userId)
@@ -53,12 +45,29 @@ class AuthenticationController extends Controller
     }
 
     /**
+     * This helper function that saves user in database
+     * @param Request $request
+     * @return \Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Http\Response
+     */
+    public function saveUser(Request $request)
+    {
+        $user = new User();
+        $user->name = $request->murugo_user_account_name;
+        $user->email = $request->murugo_user_account_email;
+        $user->murugo_user_id = $request->murugo_user_id;
+        $user->token = $request->murugo_access_token;
+        $user->token_expires_at = $request->expires_at;
+        $user->save();
+        return response(['response' => $user], 200);
+    }
+
+    /**
      * This helper function check if user is exist by using murugo_user_id
      * @param $murugo_user_id
      * @param $murugo_access_token
      * @return
      */
-    private function checkUSerExisting($murugo_user_id, $murugo_access_token)
+    private function checkUserExisting($murugo_user_id, $murugo_access_token)
     {
         return User::where('murugo_user_id', '=', $murugo_user_id)->where('token', '=', $murugo_access_token)->count();
     }
