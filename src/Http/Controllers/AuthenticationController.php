@@ -4,9 +4,9 @@ namespace RwandaBuild\MurugoAuth\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\User;
+use RwandaBuild\MurugoAuth\Http\Resources\UserResource;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
-use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 
 class AuthenticationController extends Controller
@@ -19,7 +19,15 @@ class AuthenticationController extends Controller
      */
     public function getMurugoResponse(Request $request)
     {
-        if (!empty($request->all())) {
+        if (!isset($request->murugo_user_id)) {
+            return response(['error' => 'Oops, murugo_user_id is required'], 400);
+        } elseif (!isset($request->murugo_user_account_name)) {
+            return response(['error' => 'Oops, murugo_user_account_name is required'], 400);
+        } elseif (!isset($request->murugo_access_token)) {
+            return response(['error' => 'Oops, murugo_access_token is required'], 400);
+        } elseif (!isset($request->murugo_user_account_email)) {
+            return response(['error' => 'Oops, murugo_user_account_email is required'], 400);
+        } else {
 
             //Grab object
             $userObject = User::where('murugo_user_id', '=', $request->murugo_user_id)->first();
@@ -30,17 +38,17 @@ class AuthenticationController extends Controller
             $userId = $userObject->id;
             $token = $userObject->token;
 
-            $checkUser = $this->checkUserExisting($request->murugo_user_id, $token);
+            $checkUser = $this->checkUserToken($request->murugo_user_id, $token);
 
             if (!$checkUser) {
                 //Save user in database
                 return $this->saveUser($request);
             }
             //Update the user with new access_token
-            DB::table('users')->where('id', $userId)
+            User::where('id', $userId)
                 ->update(['token' => $request->murugo_access_token, 'token_expires_at' => $request->expires_at]);
 
-            return response(['response' => 'DONE'], 200);
+            return response(['response' => 'Successfully updated'], 200);
         }
     }
 
@@ -57,8 +65,10 @@ class AuthenticationController extends Controller
         $user->murugo_user_id = $request->murugo_user_id;
         $user->token = $request->murugo_access_token;
         $user->token_expires_at = $request->expires_at;
+        $user->murugo_user_avatar = $request->murugo_user_avatar;
+        $user->murugo_user_public_name = $request->murugo_user_public_name;
         $user->save();
-        return response(['response' => $user], 200);
+        return response(['response' => new UserResource($user)], 200);
     }
 
     /**
@@ -67,7 +77,7 @@ class AuthenticationController extends Controller
      * @param $murugo_access_token
      * @return
      */
-    private function checkUserExisting($murugo_user_id, $murugo_access_token)
+    private function checkUserToken($murugo_user_id, $murugo_access_token)
     {
         return User::where('murugo_user_id', '=', $murugo_user_id)->where('token', '=', $murugo_access_token)->count();
     }
@@ -92,15 +102,15 @@ class AuthenticationController extends Controller
 
         //check if access token is valid every time before authenticate user, do the request from murugo
         try {
-            $client = new Client();
-            $response = $client->request('GET', env('MURUGO_URL') . 'api/thirdparty-me', [
-                'headers' => [
-                    'Authorization' => "Bearer $token",
-                    'Accept' => 'application/json'
-                ]
-            ]);
-            json_decode($response->getBody()->getContents());
-            return response(['response' => $user], 200);
+//            $client = new Client();
+//            $response = $client->request('GET', env('MURUGO_URL') . 'api/thirdparty-me', [
+//                'headers' => [
+//                    'Authorization' => "Bearer $token",
+//                    'Accept' => 'application/json'
+//                ]
+//            ]);
+//            json_decode($response->getBody()->getContents());
+            return response(['response' => new UserResource($user)], 200);
         } catch (ClientException $exception) {
             $this->catchError($exception);
             return response(['error' => 'Failed to authenticate user'], 400);
