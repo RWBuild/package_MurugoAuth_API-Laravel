@@ -3,8 +3,8 @@
 namespace RwandaBuild\MurugoAuth\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\User;
-use RwandaBuild\MurugoAuth\Http\Resources\UserResource;
+use RwandaBuild\MurugoAuth\Models\MurugoUser;
+use RwandaBuild\MurugoAuth\Http\Resources\MurugoUserResource;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
 use App\Http\Controllers\Controller;
@@ -30,7 +30,7 @@ class AuthenticationController extends Controller
         } else {
 
             //Grab object
-            $userObject = User::where('murugo_user_id', '=', $request->murugo_user_id)->first();
+            $userObject = MurugoUser::where('murugo_user_id', '=', $request->murugo_user_id)->first();
             if (!$userObject) {
                 //Save user in database
                 return $this->saveUser($request);
@@ -45,7 +45,7 @@ class AuthenticationController extends Controller
                 return $this->saveUser($request);
             }
             //Update the user with new access_token
-            User::where('id', $userId)
+            MurugoUser::where('id', $userId)
                 ->update(['token' => $request->murugo_access_token, 'token_expires_at' => $request->expires_at]);
 
             return response(['response' => 'Successfully updated'], 200);
@@ -59,7 +59,7 @@ class AuthenticationController extends Controller
      */
     public function saveUser(Request $request)
     {
-        $user = new User();
+        $user = new MurugoUser();
         $user->name = $request->murugo_user_account_name;
         $user->email = $request->murugo_user_account_email;
         $user->murugo_user_id = $request->murugo_user_id;
@@ -68,7 +68,7 @@ class AuthenticationController extends Controller
         $user->murugo_user_avatar = $request->murugo_user_avatar;
         $user->murugo_user_public_name = $request->murugo_user_public_name;
         $user->save();
-        return response(['response' => new UserResource($user)], 200);
+        return response(['response' => new MurugoUserResource($user)], 200);
     }
 
     /**
@@ -79,7 +79,7 @@ class AuthenticationController extends Controller
      */
     private function checkUserToken($murugo_user_id, $murugo_access_token)
     {
-        return User::where('murugo_user_id', '=', $murugo_user_id)->where('token', '=', $murugo_access_token)->count();
+        return MurugoUser::where('murugo_user_id', '=', $murugo_user_id)->where('token', '=', $murugo_access_token)->count();
     }
 
     /**
@@ -93,7 +93,7 @@ class AuthenticationController extends Controller
     {
         $uuid = $request->uuid;
 
-        $user = User::where('murugo_user_id', '=', $uuid)->first();
+        $user = MurugoUser::where('murugo_user_id', '=', $uuid)->first();
         $token = $user->token;
 
         if (!$user) {
@@ -110,7 +110,7 @@ class AuthenticationController extends Controller
                 ]
             ]);
             json_decode($response->getBody()->getContents());
-            return response(['response' => new UserResource($user)], 200);
+            return response(['response' => new MurugoUserResource($user)], 200);
         } catch (ClientException $exception) {
             $this->catchError($exception);
             return response(['error' => 'Failed to authenticate user'], 400);
