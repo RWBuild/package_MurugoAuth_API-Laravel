@@ -21,7 +21,7 @@ MURUGO_URL= "MURUGO BASE URL"
 
 #### 3. Use the following migration
 ```php
-Schema::create('users', function (Blueprint $table) {
+Schema::create('murugo_users', function (Blueprint $table) {
     $table->bigIncrements('id');
     $table->string('name');
     $table->string('email')->unique();
