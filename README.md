@@ -2,7 +2,7 @@
 
 [![Issues](https://img.shields.io/github/issues/RWBuild/package_MurugoAuth_API-Laravel.svg?style=flat-square)](https://github.com/RWBuild/package_MurugoAuth_API-Laravel/issues)
 [![Stars](https://img.shields.io/github/stars/RWBuild/package_MurugoAuth_API-Laravel.svg?style=flat-square)](https://github.com/RWBuild/package_MurugoAuth_API-Laravel/stargazers)
-
+[![Total Downloads](https://img.shields.io/packagist/dt/rwandabuild/murugo_api_auth.svg?style=flat-square)](https://packagist.org/packages/rwandabuild/murugo_api_auth)
 
 Package that will be used for Murugo auth to all 3rd party laravel projects with only API structure
 
