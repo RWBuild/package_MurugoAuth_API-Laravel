@@ -102,14 +102,14 @@ class AuthenticationController extends Controller
 
         //check if access token is valid every time before authenticate user, do the request from murugo
         try {
-//            $client = new Client();
-//            $response = $client->request('GET', env('MURUGO_URL') . 'api/thirdparty-me', [
-//                'headers' => [
-//                    'Authorization' => "Bearer $token",
-//                    'Accept' => 'application/json'
-//                ]
-//            ]);
-//            json_decode($response->getBody()->getContents());
+            $client = new Client();
+            $response = $client->request('GET', env('MURUGO_URL') . 'api/thirdparty-me', [
+                'headers' => [
+                    'Authorization' => "Bearer $token",
+                    'Accept' => 'application/json'
+                ]
+            ]);
+            json_decode($response->getBody()->getContents());
             return response(['response' => new UserResource($user)], 200);
         } catch (ClientException $exception) {
             $this->catchError($exception);
