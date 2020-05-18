@@ -92,7 +92,9 @@ class AuthenticationController extends Controller
      */
     public function authenticateUser(Request $request)
     {
-        $user = $this->getMurugoUser($request);
+        $uuid = $request->uuid;
+
+        $user = MurugoUser::where('murugo_user_id', '=', $uuid)->first();
         $token = $user->token;
 
         if (!$user) {
@@ -193,18 +195,5 @@ class AuthenticationController extends Controller
             $object->catchError($exception);
             return response(['response' => 'Failed to logout on murugo'], 400);
         }
-    }
-
-    /**
-     * This custom function that returns only murugo user by checking UUID
-     * @param Request $request
-     * @return
-     */
-    public function getMurugoUser(Request $request)
-    {
-        $uuid = $request->uuid;
-
-        $user = MurugoUser::where('murugo_user_id', '=', $uuid)->first();
-        return $user;
     }
 }
