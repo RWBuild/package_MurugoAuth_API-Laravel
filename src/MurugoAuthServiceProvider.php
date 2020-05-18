@@ -9,6 +9,7 @@
 namespace RwandaBuild\MurugoAuth;
 
 use Illuminate\Support\ServiceProvider;
+use RwandaBuild\MurugoAuth\Http\Controllers\AuthenticationController;
 
 class MurugoAuthServiceProvider extends ServiceProvider
 {
@@ -19,7 +20,7 @@ class MurugoAuthServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        //
+        $this->app->bind('MurugoAuth', AuthenticationController::class);
     }
 
     /**

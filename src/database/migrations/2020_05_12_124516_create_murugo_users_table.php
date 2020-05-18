@@ -18,8 +18,8 @@ class CreateMurugoUsersTable extends Migration
             $table->string('name');
             $table->string('email')->unique();
             $table->string('murugo_user_id');
-            $table->string('murugo_user_avatar', 255)->nullable();;
-            $table->string('murugo_user_public_name', 255)->nullable();;
+            $table->string('murugo_user_avatar', 255)->nullable();
+            $table->string('murugo_user_public_name', 255)->nullable();
             $table->text('token');
             $table->timestamp('token_expires_at')->nullable();
             $table->timestamp('email_verified_at')->nullable();

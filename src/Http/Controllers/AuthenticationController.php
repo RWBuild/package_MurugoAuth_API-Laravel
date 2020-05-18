@@ -11,6 +11,7 @@ use App\Http\Controllers\Controller;
 
 class AuthenticationController extends Controller
 {
+
     /**
      * Function than receive response object of murugo server
      * Check if user exist and save it if it does not
@@ -91,9 +92,7 @@ class AuthenticationController extends Controller
      */
     public function authenticateUser(Request $request)
     {
-        $uuid = $request->uuid;
-
-        $user = MurugoUser::where('murugo_user_id', '=', $uuid)->first();
+        $user = $this->getMurugoUser($request);
         $token = $user->token;
 
         if (!$user) {
@@ -154,5 +153,58 @@ class AuthenticationController extends Controller
         $statusCode = $response->getStatusCode();
         //$error = json_decode($response->getBody());
         return response($statusCode);
+    }
+
+    /**
+     * This function will be accessed as facade for getting user object
+     */
+    public static function user()
+    {
+        $object = new AuthenticationController();
+        $user = $object->getMurugoUser(request());
+        return $user;
+    }
+
+
+    /**
+     * This function will be accessed as facade for getting user object from murugo by help of token
+     * @param $token
+     * @return mixed
+     */
+    public static function userFromToken($token)
+    {
+
+        $object = new AuthenticationController();
+
+
+        try {
+
+            $client = new Client();
+            $response = $client->request('GET', env('MURUGO_URL') . 'api/thirdparty-me', [
+                'headers' => [
+                    'Authorization' => "Bearer $token",
+                    'Accept' => 'application/json'
+                ]
+            ]);
+            $user = json_decode($response->getBody()->getContents());
+            return $user;
+
+        } catch (ClientException $exception) {
+            $object->catchError($exception);
+            return response(['response' => 'Failed to logout on murugo'], 400);
+        }
+    }
+
+    /**
+     * This custom function that returns only murugo user by checking UUID
+     * @param Request $request
+     * @return
+     */
+    public function getMurugoUser(Request $request)
+    {
+        $uuid = $request->uuid;
+
+        $user = MurugoUser::where('murugo_user_id', '=', $uuid)->first();
+        return $user;
     }
 }
