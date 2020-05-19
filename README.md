@@ -36,6 +36,11 @@ Schema::create('murugo_users', function (Blueprint $table) {
     $table->timestamps();
 });
 ```
+#### 4. Dont forget to publish your migration by running the following command
+```json
+php artisan vendor:publish
+```
+
 ## By Default package will add the following api routes in your laravel project
 
 - api/murugo-auth >>> This route will be used to get response sent from murugo and save in your laravel project database

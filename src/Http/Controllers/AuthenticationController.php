@@ -122,6 +122,7 @@ class AuthenticationController extends Controller
      * This function logout user on MurugoCloudCore by destroying token
      * @param Request $request
      * @return \Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Http\Response
+     * @throws \Exception
      */
     public function logoutUser(Request $request)
     {
@@ -138,8 +139,7 @@ class AuthenticationController extends Controller
             json_decode($response->getBody()->getContents());
             return response(['response' => 'Successfully logged out on murugo'], 200);
         } catch (ClientException $exception) {
-            $this->catchError($exception);
-            return response(['response' => 'Failed to logout on murugo'], 400);
+            throw new \Exception('Failed to log out', 400);
         }
     }
 
@@ -158,26 +158,13 @@ class AuthenticationController extends Controller
     }
 
     /**
-     * This function will be accessed as facade for getting user object
-     */
-    public static function user()
-    {
-        $object = new AuthenticationController();
-        $user = $object->getMurugoUser(request());
-        return $user;
-    }
-
-
-    /**
      * This function will be accessed as facade for getting user object from murugo by help of token
      * @param $token
      * @return mixed
+     * @throws \Exception
      */
     public static function userFromToken($token)
     {
-
-        $object = new AuthenticationController();
-
 
         try {
 
@@ -192,8 +179,7 @@ class AuthenticationController extends Controller
             return $user;
 
         } catch (ClientException $exception) {
-            $object->catchError($exception);
-            return response(['response' => 'Failed to logout on murugo'], 400);
+            throw new \Exception('Failed to connect', 400);
         }
     }
 }
