@@ -16,7 +16,7 @@ composer require rwandabuild/murugo_api_auth
 
 #### 2. Include the following variables in ENV file and replace them your their values
 ```json
-MURUGO_URL= "MURUGO BASE URL"
+MURUGO_URL= "MURUGO BASE URL/"
 ```
 
 #### 3. Use the following migration
