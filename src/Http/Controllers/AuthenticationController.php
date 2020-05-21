@@ -119,7 +119,7 @@ class AuthenticationController extends Controller
     }
 
     /**
-     * This function logout user on MurugoCloudCore by destroying token
+     * This function logout user on MurugoCloudCore by destroying token for API structure
      * @param Request $request
      * @return \Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Http\Response
      * @throws \Exception
@@ -180,6 +180,30 @@ class AuthenticationController extends Controller
 
         } catch (ClientException $exception) {
             throw new \Exception('Failed to connect', 400);
+        }
+    }
+
+    /**
+     * This function will be accessed as facade for getting user object from murugo by help of token
+     * @param $token
+     * @return mixed
+     * @throws \Exception
+     */
+    public static function logout($token)
+    {
+        try {
+            //Logout on murugo by sending request to murugo to destroy the token
+            $client = new Client();
+            $response = $client->request('GET', env('MURUGO_URL') . 'api/thirdparty-logout', [
+                'headers' => [
+                    'Authorization' => "Bearer $token",
+                    'Accept' => 'application/json'
+                ]
+            ]);
+            json_decode($response->getBody()->getContents());
+            return response(['response' => 'Successfully logged out on murugo'], 200);
+        } catch (ClientException $exception) {
+            throw new \Exception('Failed to log out', 400);
         }
     }
 }
