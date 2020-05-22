@@ -181,19 +181,19 @@ class AuthenticationController extends Controller
                     'Accept' => 'application/json'
                 ]
             ]);
-            $user = json_decode($response->getBody()->getContents());
+            $murugoUser = json_decode($response->getBody()->getContents());
 
-            $userObject = MurugoUser::where('murugo_user_id', '=', $user['hashed_murugo_user_id'])->first();
+            $userObject = MurugoUser::where('murugo_user_id', '=', $murugoUser->hashed_murugo_user_id)->first();
             if (!$userObject) {
                 //Save user in database
                 $user = new MurugoUser();
-                $user->name = $user['name'];
-                $user->email = $user['email'];
-                $user->murugo_user_id = $user['hashed_murugo_user_id'];
+                $user->name = $murugoUser->name;
+                $user->email = $murugoUser->email;
+                $user->murugo_user_id = $murugoUser->hashed_murugo_user_id;
                 $user->token = $token;
                 $user->token_expires_at = $expires_at;
-                $user->murugo_user_avatar = $user['avatar'];
-                $user->murugo_user_public_name = $user['public_name'];
+                $user->murugo_user_avatar = $murugoUser->avatar;
+                $user->murugo_user_public_name = $murugoUser->public_name;
                 $user->save();
                 return $user;
             }
@@ -210,7 +210,12 @@ class AuthenticationController extends Controller
         }
     }
 
-
+    /**
+     * This function will be accessed as facade for getting user object from murugo by help of UUID
+     * @param Request $request
+     * @return mixed
+     * @throws MurugoAuthException
+     */
     public static function userFromUUID(Request $request)
     {
         $uuid = $request->uuid;

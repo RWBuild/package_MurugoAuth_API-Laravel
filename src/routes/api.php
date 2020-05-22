@@ -22,7 +22,7 @@ Route::group(['namespace' => 'RwandaBuild\MurugoAuth\Http\Controllers'], functio
 
     //TEST URLS
     Route::get('/api/test-user',function() {
-        return \RwandaBuild\MurugoAuth\Facades\MurugoAuth::user();
+        return \RwandaBuild\MurugoAuth\Facades\MurugoAuth::userFromToken();
     })->name('test-user');
 });
 
