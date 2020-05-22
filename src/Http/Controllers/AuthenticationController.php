@@ -3,10 +3,12 @@
 namespace RwandaBuild\MurugoAuth\Http\Controllers;
 
 use Illuminate\Http\Request;
+use RwandaBuild\MurugoAuth\Exceptions\MurugoAuthException;
 use RwandaBuild\MurugoAuth\Models\MurugoUser;
 use RwandaBuild\MurugoAuth\Http\Resources\MurugoUserResource;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
+use GuzzleHttp\Exception\ConnectException;
 use App\Http\Controllers\Controller;
 
 class AuthenticationController extends Controller
@@ -139,7 +141,10 @@ class AuthenticationController extends Controller
             json_decode($response->getBody()->getContents());
             return response(['response' => 'Successfully logged out on murugo'], 200);
         } catch (ClientException $exception) {
-            throw new \Exception('Failed to log out', 400);
+            $response = $exception->getResponse();
+            $statusCode = $response->getStatusCode();
+            $error = json_decode($response->getBody());
+            throw new MurugoAuthException($error->message, $statusCode);
         }
     }
 
@@ -160,10 +165,11 @@ class AuthenticationController extends Controller
     /**
      * This function will be accessed as facade for getting user object from murugo by help of token
      * @param $token
+     * @param null $expires_at
      * @return mixed
      * @throws \Exception
      */
-    public static function userFromToken($token)
+    public static function userFromToken($token, $expires_at = null)
     {
 
         try {
@@ -176,10 +182,60 @@ class AuthenticationController extends Controller
                 ]
             ]);
             $user = json_decode($response->getBody()->getContents());
-            return $user;
+
+            $userObject = MurugoUser::where('murugo_user_id', '=', $user['hashed_murugo_user_id'])->first();
+            if (!$userObject) {
+                //Save user in database
+                $user = new MurugoUser();
+                $user->name = $user['name'];
+                $user->email = $user['email'];
+                $user->murugo_user_id = $user['hashed_murugo_user_id'];
+                $user->token = $token;
+                $user->token_expires_at = $expires_at;
+                $user->murugo_user_avatar = $user['avatar'];
+                $user->murugo_user_public_name = $user['public_name'];
+                $user->save();
+                return $user;
+            }
+
+            return $userObject;
 
         } catch (ClientException $exception) {
-            throw new \Exception('Failed to connect', 400);
+            $response = $exception->getResponse();
+            $statusCode = $response->getStatusCode();
+            $error = json_decode($response->getBody());
+            throw new MurugoAuthException($error->message, $statusCode);
+        } catch (ConnectException $exception) {
+            throw new \Exception($exception->getMessage(), 400);
+        }
+    }
+
+
+    public static function userFromUUID(Request $request)
+    {
+        $uuid = $request->uuid;
+
+        $user = MurugoUser::where('murugo_user_id', '=', $uuid)->first();
+
+        if (!$user) {
+            throw new MurugoAuthException("Unauthenticated", 401);
+        }
+
+        //check if access token is valid every time before authenticate user, do the request from murugo
+        try {
+            $client = new Client();
+            $response = $client->request('GET', env('MURUGO_URL') . 'api/thirdparty-me', [
+                'headers' => [
+                    'Authorization' => "Bearer $user->token",
+                    'Accept' => 'application/json'
+                ]
+            ]);
+            json_decode($response->getBody()->getContents());
+            return $user;
+        } catch (ClientException $exception) {
+            $response = $exception->getResponse();
+            $statusCode = $response->getStatusCode();
+            throw new MurugoAuthException($exception->getMessage(), $statusCode);
         }
     }
 
@@ -203,7 +259,9 @@ class AuthenticationController extends Controller
             json_decode($response->getBody()->getContents());
             return response(['response' => 'Successfully logged out on murugo'], 200);
         } catch (ClientException $exception) {
-            throw new \Exception('Failed to log out', 400);
+            $response = $exception->getResponse();
+            $statusCode = $response->getStatusCode();
+            throw new MurugoAuthException($exception->getMessage(), $statusCode);
         }
     }
 }
