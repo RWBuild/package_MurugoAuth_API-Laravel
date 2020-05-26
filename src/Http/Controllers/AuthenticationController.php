@@ -47,9 +47,13 @@ class AuthenticationController extends Controller
                 //Save user in database
                 return $this->saveUser($request);
             }
+
             //Update the user with new access_token
             MurugoUser::where('id', $userId)
-                ->update(['token' => $request->murugo_access_token, 'token_expires_at' => $request->expires_at]);
+                ->update(['token' => $request->murugo_access_token,
+                    'murugo_user_public_name' => $request->murugo_user_public_name,
+                    'murugo_user_avatar' => $request->murugo_user_avatar,
+                    'token_expires_at' => $request->expires_at]);
 
             return response(['response' => 'Successfully updated'], 200);
         }
