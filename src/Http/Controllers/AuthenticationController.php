@@ -202,7 +202,13 @@ class AuthenticationController extends Controller
                 return $user;
             }
 
-            return $userObject;
+            $updatedUser = MurugoUser::where('murugo_user_id', $murugoUser->hashed_murugo_user_id)
+                ->update(['token' => $token,
+                    'murugo_user_public_name' => $murugoUser->public_name,
+                    'murugo_user_avatar' => $murugoUser->avatar,
+                    'token_expires_at' => $expires_at]);
+
+            return $updatedUser;
 
         } catch (ClientException $exception) {
             $response = $exception->getResponse();
@@ -239,8 +245,12 @@ class AuthenticationController extends Controller
                     'Accept' => 'application/json'
                 ]
             ]);
-            json_decode($response->getBody()->getContents());
-            return $user;
+            $murugoUser = json_decode($response->getBody()->getContents());
+
+            $updatedUser = MurugoUser::where('murugo_user_id', $murugoUser->hashed_murugo_user_id)
+                ->update(['murugo_user_public_name' => $murugoUser->public_name,
+                    'murugo_user_avatar' => $murugoUser->avatar]);
+            return $updatedUser;
         } catch (ClientException $exception) {
             $response = $exception->getResponse();
             $statusCode = $response->getStatusCode();
