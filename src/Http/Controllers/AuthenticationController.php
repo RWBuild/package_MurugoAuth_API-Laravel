@@ -202,11 +202,9 @@ class AuthenticationController extends Controller
                 return $user;
             }
 
-            MurugoUser::where('murugo_user_id', $murugoUser->hashed_murugo_user_id)
-                ->update(['token' => $token,
-                    'murugo_user_public_name' => $murugoUser->public_name,
-                    'murugo_user_avatar' => $murugoUser->avatar,
-                    'token_expires_at' => $expires_at]);
+            $userObject->murugo_user_public_name = $murugoUser->public_name;
+            $userObject->murugo_user_avatar = $murugoUser->avatar;
+            $userObject->save();
 
             return $userObject->fresh();
 
@@ -247,9 +245,9 @@ class AuthenticationController extends Controller
             ]);
             $murugoUser = json_decode($response->getBody()->getContents());
 
-            MurugoUser::where('murugo_user_id', $murugoUser->hashed_murugo_user_id)
-                ->update(['murugo_user_public_name' => $murugoUser->public_name,
-                    'murugo_user_avatar' => $murugoUser->avatar]);
+            $user->murugo_user_public_name = $murugoUser->public_name;
+            $user->murugo_user_avatar = $murugoUser->avatar;
+            $user->save();
 
             //This is new for me Hint from Promesse
             return $user->fresh();
