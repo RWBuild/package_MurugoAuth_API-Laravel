@@ -202,13 +202,13 @@ class AuthenticationController extends Controller
                 return $user;
             }
 
-            $updatedUser = MurugoUser::where('murugo_user_id', $murugoUser->hashed_murugo_user_id)
+            MurugoUser::where('murugo_user_id', $murugoUser->hashed_murugo_user_id)
                 ->update(['token' => $token,
                     'murugo_user_public_name' => $murugoUser->public_name,
                     'murugo_user_avatar' => $murugoUser->avatar,
                     'token_expires_at' => $expires_at]);
 
-            return $updatedUser;
+            return $userObject->fresh();
 
         } catch (ClientException $exception) {
             $response = $exception->getResponse();
@@ -247,10 +247,12 @@ class AuthenticationController extends Controller
             ]);
             $murugoUser = json_decode($response->getBody()->getContents());
 
-            $updatedUser = MurugoUser::where('murugo_user_id', $murugoUser->hashed_murugo_user_id)
+            MurugoUser::where('murugo_user_id', $murugoUser->hashed_murugo_user_id)
                 ->update(['murugo_user_public_name' => $murugoUser->public_name,
                     'murugo_user_avatar' => $murugoUser->avatar]);
-            return $updatedUser;
+
+            //This is new for me Hint from Promesse
+            return $user->fresh();
         } catch (ClientException $exception) {
             $response = $exception->getResponse();
             $statusCode = $response->getStatusCode();
