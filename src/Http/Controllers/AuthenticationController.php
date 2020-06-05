@@ -28,8 +28,6 @@ class AuthenticationController extends Controller
             return response(['error' => 'Oops, murugo_user_account_name is required'], 400);
         } elseif (!isset($request->murugo_access_token)) {
             return response(['error' => 'Oops, murugo_access_token is required'], 400);
-        } elseif (!isset($request->murugo_user_account_email)) {
-            return response(['error' => 'Oops, murugo_user_account_email is required'], 400);
         } else {
 
             //Grab object
@@ -68,7 +66,6 @@ class AuthenticationController extends Controller
     {
         $user = new MurugoUser();
         $user->name = $request->murugo_user_account_name;
-        $user->email = $request->murugo_user_account_email;
         $user->murugo_user_id = $request->murugo_user_id;
         $user->token = $request->murugo_access_token;
         $user->token_expires_at = $request->expires_at;
@@ -192,7 +189,6 @@ class AuthenticationController extends Controller
                 //Save user in database
                 $user = new MurugoUser();
                 $user->name = $murugoUser->name;
-                $user->email = $murugoUser->email;
                 $user->murugo_user_id = $murugoUser->hashed_murugo_user_id;
                 $user->token = $token;
                 $user->token_expires_at = $expires_at;
