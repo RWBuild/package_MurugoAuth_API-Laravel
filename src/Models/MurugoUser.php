@@ -8,6 +8,8 @@ class MurugoUser extends Model
 {
     protected $guarded = [];
 
+    public $timestamps = false;
+
     public function user()
     {
         return $this->hasOne(\App\User::class);
