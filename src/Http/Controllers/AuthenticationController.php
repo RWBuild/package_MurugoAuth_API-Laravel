@@ -39,7 +39,7 @@ class AuthenticationController extends Controller
                 $murugoUser = $this->saveUser($request);
                 //Create MurugoOneTimeToken
                 $murugoOneTimeTokenObject = $this->createMurugoOneTimeToken($murugoUser);
-                $murugoOneTimeToken = $murugoOneTimeTokenObject->token;
+                $murugoOneTimeToken = $murugoOneTimeTokenObject->one_time_token;
 
                 return response(['response' => $murugoOneTimeToken], 200);
             }
@@ -57,7 +57,7 @@ class AuthenticationController extends Controller
 
             //Create MurugoOneTimeToken
             $murugoOneTimeTokenObject = $this->createMurugoOneTimeToken($userObject);
-            $murugoOneTimeToken = $murugoOneTimeTokenObject->token;
+            $murugoOneTimeToken = $murugoOneTimeTokenObject->one_time_token;
 
             return response(['response' => $murugoOneTimeToken], 200);
         }
@@ -253,7 +253,7 @@ class AuthenticationController extends Controller
         }
 
         //delete one time token
-        $murugoOneTimeToken->delete();
+        $murugoOneTimeToken->update(['is_used'=> true]);
 
         return $murugoOneTimeToken->murugo_user;
     }
