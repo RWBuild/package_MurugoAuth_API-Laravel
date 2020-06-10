@@ -223,6 +223,8 @@ class AuthenticationController extends Controller
             $userObject->murugo_user_avatar = $murugoUser->avatar;
             $userObject->save();
 
+            self::createMurugoOneTimeToken($userObject);
+
             return $userObject->fresh();
         } catch (ClientException $exception) {
             $response = $exception->getResponse();
