@@ -2,8 +2,10 @@
 
 namespace RwandaBuild\MurugoAuth\Http\Controllers;
 
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use RwandaBuild\MurugoAuth\Exceptions\MurugoAuthException;
+use RwandaBuild\MurugoAuth\Models\MurugoOneTimeToken;
 use RwandaBuild\MurugoAuth\Models\MurugoUser;
 use RwandaBuild\MurugoAuth\Http\Resources\MurugoUserResource;
 use GuzzleHttp\Client;
@@ -18,7 +20,7 @@ class AuthenticationController extends Controller
      * Function than receive response object of murugo server
      * Check if user exist and save it if it does not
      * @param Request $request
-     * @return \Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Http\Response
+     * @return \Illuminate\Database\Eloquent\Model
      */
     public function getMurugoResponse(Request $request)
     {
@@ -34,33 +36,63 @@ class AuthenticationController extends Controller
             $userObject = MurugoUser::where('murugo_user_id', '=', $request->murugo_user_id)->first();
             if (!$userObject) {
                 //Save user in database
-                return $this->saveUser($request);
+                $murugoUser = $this->saveUser($request);
+                //Create MurugoOneTimeToken
+                $murugoOneTimeTokenObject = $this->createMurugoOneTimeToken($murugoUser);
+                $murugoOneTimeToken = $murugoOneTimeTokenObject->token;
+
+                return response(['response' => $murugoOneTimeToken], 200);
             }
+
             $userId = $userObject->id;
-            $token = $userObject->token;
-
-            $checkUser = $this->checkUserToken($request->murugo_user_id, $token);
-
-            if (!$checkUser) {
-                //Save user in database
-                return $this->saveUser($request);
-            }
 
             //Update the user with new access_token
-            MurugoUser::where('id', $userId)
-                ->update(['token' => $request->murugo_access_token,
+            $murugoUser = MurugoUser::where('id', $userId)
+                ->update([
+                    'token' => $request->murugo_access_token,
                     'murugo_user_public_name' => $request->murugo_user_public_name,
                     'murugo_user_avatar' => $request->murugo_user_avatar,
-                    'token_expires_at' => $request->expires_at]);
+                    'token_expires_at' => $request->expires_at
+                ]);
 
-            return response(['response' => 'Successfully updated'], 200);
+            //Create MurugoOneTimeToken
+            $murugoOneTimeTokenObject = $this->createMurugoOneTimeToken($murugoUser);
+            $murugoOneTimeToken = $murugoOneTimeTokenObject->token;
+
+            return response(['response' => $murugoOneTimeToken], 200);
         }
+    }
+
+
+    /**
+     * This helper function which will create onetimeToken of the user
+     * @param MurugoUser $murugoUser
+     * @return \Illuminate\Database\Eloquent\Model
+     * @internal param Request $request
+     */
+    private function createMurugoOneTimeToken(MurugoUser $murugoUser)
+    {
+        $this->deleteMurugoOneTimeToken($murugoUser);
+        $expires_at = Carbon::now()->addMinutes(5);
+        $token = bin2hex(openssl_random_pseudo_bytes(20));
+        return $murugoUser->murugo_one_time_tokens()->create(['expires_at' => $expires_at, 'one_time_token' => $token]);
+    }
+
+    /**
+     * This helper function which will delete onetimeToken of the user
+     * @param MurugoUser $murugoUser
+     * @return \Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Http\Response
+     * @internal param Request $request
+     */
+    private function deleteMurugoOneTimeToken(MurugoUser $murugoUser)
+    {
+        return $murugoUser->murugo_one_time_tokens()->delete();
     }
 
     /**
      * This helper function that saves user in database
      * @param Request $request
-     * @return \Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Http\Response
+     * @return MurugoUser
      */
     public function saveUser(Request $request)
     {
@@ -72,18 +104,7 @@ class AuthenticationController extends Controller
         $user->murugo_user_avatar = $request->murugo_user_avatar;
         $user->murugo_user_public_name = $request->murugo_user_public_name;
         $user->save();
-        return response(['response' => new MurugoUserResource($user)], 200);
-    }
-
-    /**
-     * This helper function check if user is exist by using murugo_user_id
-     * @param $murugo_user_id
-     * @param $murugo_access_token
-     * @return
-     */
-    private function checkUserToken($murugo_user_id, $murugo_access_token)
-    {
-        return MurugoUser::where('murugo_user_id', '=', $murugo_user_id)->where('token', '=', $murugo_access_token)->count();
+        return $user;
     }
 
     /**
@@ -91,34 +112,34 @@ class AuthenticationController extends Controller
      * Check if that token exist and get user belongs to that token
      * If token is not exist, mostly for new user, create new user and set token as well
      * @param Request $request
-     * @return \Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
+     * @return \Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Http\Response
      */
     public function authenticateUser(Request $request)
     {
-        $uuid = $request->uuid;
+        $otToken = $request->ottoken;
 
-        $user = MurugoUser::where('murugo_user_id', '=', $uuid)->first();
-        $token = $user->token;
+        $murugoOneTimeToken = self::checkOneTimeToken($otToken);
 
-        if (!$user) {
-            return response(['response' => 'User not found'], 404);
+        if (!$murugoOneTimeToken) {
+            return response(['response' => 'Token not found'], 404);
         }
 
-        //check if access token is valid every time before authenticate user, do the request from murugo
-        try {
-            $client = new Client();
-            $response = $client->request('GET', env('MURUGO_URL') . 'api/thirdparty-me', [
-                'headers' => [
-                    'Authorization' => "Bearer $token",
-                    'Accept' => 'application/json'
-                ]
-            ]);
-            json_decode($response->getBody()->getContents());
-            return response(['response' => new MurugoUserResource($user)], 200);
-        } catch (ClientException $exception) {
-            $this->catchError($exception);
-            return response(['error' => 'Failed to authenticate user'], 400);
-        }
+        $murugoUser = $murugoOneTimeToken->murugo_user;
+
+        return response(['response' => new MurugoUserResource($murugoUser)], 200);
+    }
+
+    /**
+     * Function than check if OneTimeToken is valid, if it exists, and if it never been used
+     * @param $otToken
+     * @return
+     */
+    private static function checkOneTimeToken($otToken)
+    {
+        return MurugoOneTimeToken::where('one_time_time', $otToken)
+            ->where('expires_at', '<=', Carbon::now())
+            ->where('is_used', false)->first();
+
     }
 
     /**
@@ -203,7 +224,6 @@ class AuthenticationController extends Controller
             $userObject->save();
 
             return $userObject->fresh();
-
         } catch (ClientException $exception) {
             $response = $exception->getResponse();
             $statusCode = $response->getStatusCode();
@@ -216,42 +236,21 @@ class AuthenticationController extends Controller
 
     /**
      * This function will be accessed as facade for getting user object from murugo by help of UUID
-     * @param Request $request
      * @return mixed
      * @throws MurugoAuthException
+     * @internal param Request $request
      */
-    public static function userFromUUID(Request $request)
+    public static function murugoUser()
     {
-        $uuid = $request->uuid;
+        $otToken = request()->ottoken;
 
-        $user = MurugoUser::where('murugo_user_id', '=', $uuid)->first();
+        $murugoOneTimeToken = self::checkOneTimeToken($otToken);
 
-        if (!$user) {
+        if (!$murugoOneTimeToken) {
             throw new MurugoAuthException("Unauthenticated", 401);
         }
 
-        //check if access token is valid every time before authenticate user, do the request from murugo
-        try {
-            $client = new Client();
-            $response = $client->request('GET', env('MURUGO_URL') . 'api/thirdparty-me', [
-                'headers' => [
-                    'Authorization' => "Bearer $user->token",
-                    'Accept' => 'application/json'
-                ]
-            ]);
-            $murugoUser = json_decode($response->getBody()->getContents());
-
-            $user->murugo_user_public_name = $murugoUser->public_name;
-            $user->murugo_user_avatar = $murugoUser->avatar;
-            $user->save();
-
-            //This is new for me Hint from Promesse
-            return $user->fresh();
-        } catch (ClientException $exception) {
-            $response = $exception->getResponse();
-            $statusCode = $response->getStatusCode();
-            throw new MurugoAuthException($exception->getMessage(), $statusCode);
-        }
+        return $murugoOneTimeToken->murugo_user;
     }
 
     /**
