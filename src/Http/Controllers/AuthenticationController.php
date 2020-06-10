@@ -137,7 +137,7 @@ class AuthenticationController extends Controller
     private static function checkOneTimeToken($otToken)
     {
         return MurugoOneTimeToken::where('one_time_token', $otToken)
-            ->where('expires_at', '<=', Carbon::now())
+            ->where('expires_at', '>=', Carbon::now())
             ->where('is_used', false)->first();
 
     }
@@ -251,6 +251,9 @@ class AuthenticationController extends Controller
         if (!$murugoOneTimeToken) {
             throw new MurugoAuthException("Unauthenticated", 401);
         }
+
+        //delete one time token
+        $murugoOneTimeToken->delete();
 
         return $murugoOneTimeToken->murugo_user;
     }
