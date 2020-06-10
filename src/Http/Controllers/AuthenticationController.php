@@ -47,7 +47,7 @@ class AuthenticationController extends Controller
             $userId = $userObject->id;
 
             //Update the user with new access_token
-            $murugoUser = MurugoUser::where('id', $userId)
+            MurugoUser::where('id', $userId)
                 ->update([
                     'token' => $request->murugo_access_token,
                     'murugo_user_public_name' => $request->murugo_user_public_name,
@@ -56,7 +56,7 @@ class AuthenticationController extends Controller
                 ]);
 
             //Create MurugoOneTimeToken
-            $murugoOneTimeTokenObject = $this->createMurugoOneTimeToken($murugoUser);
+            $murugoOneTimeTokenObject = $this->createMurugoOneTimeToken($userObject);
             $murugoOneTimeToken = $murugoOneTimeTokenObject->token;
 
             return response(['response' => $murugoOneTimeToken], 200);
