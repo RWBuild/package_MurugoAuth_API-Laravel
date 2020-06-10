@@ -136,7 +136,7 @@ class AuthenticationController extends Controller
      */
     private static function checkOneTimeToken($otToken)
     {
-        return MurugoOneTimeToken::where('one_time_time', $otToken)
+        return MurugoOneTimeToken::where('one_time_token', $otToken)
             ->where('expires_at', '<=', Carbon::now())
             ->where('is_used', false)->first();
 
@@ -223,7 +223,7 @@ class AuthenticationController extends Controller
             $userObject->murugo_user_avatar = $murugoUser->avatar;
             $userObject->save();
 
-            self::createMurugoOneTimeToken($userObject);
+            (new AuthenticationController())->createMurugoOneTimeToken($userObject);
 
             return $userObject->fresh();
         } catch (ClientException $exception) {
