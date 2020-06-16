@@ -41,6 +41,11 @@ Schema::create('murugo_users', function (Blueprint $table) {
 php artisan vendor:publish
 ```
 
+#### 5. Create a login method in LoginController
+#### 6. in login method call the MurugoAuth::murugoUser();, or  that gives me the murugoUser model
+#### 7. Check weather the  murugoUser model has already a symbolic user: `murugoUser->user`
+#### 8. If There is not a symbolic user, Create one from murugoUser information
+#### 9. Then After, Create user session in web or user token for api
 ## By Default package will add the following api routes in your laravel project
 
 - api/murugo-auth >>> This route will be used to get response sent from murugo and save in your laravel project database
