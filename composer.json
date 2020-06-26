@@ -22,10 +22,12 @@
   "extra": {
     "laravel": {
       "providers": [
-        "RwandaBuild\\MurugoAuth\\MurugoAuthServiceProvider"
+        "RwandaBuild\\MurugoAuth\\MurugoAuthServiceProvider",
+        "RwandaBuild\\MurugoAuth2\\MurugoAuth2ServiceProvider"
       ],
       "aliases": {
-        "MurugoAuth": "RwandaBuild\\MurugoAuth\\Facades\\MurugoAuth"
+        "MurugoAuth": "RwandaBuild\\MurugoAuth\\Facades\\MurugoAuth",
+        "MurugoAuth2": "RwandaBuild\\MurugoAuth\\Facades\\MurugoAuth2"
       }
     }
   }
