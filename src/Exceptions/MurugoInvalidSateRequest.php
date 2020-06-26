@@ -3,7 +3,7 @@
 namespace RwandaBuild\MurugoAuth\Exceptions;
 
 use Exception;
-use App\Services\MurugoAuth;
+use RwandaBuild\MurugoAuth\Facades\MurugoAuth2;
 
 class MurugoInvalidSateRequest extends Exception
 {
@@ -37,11 +37,6 @@ class MurugoInvalidSateRequest extends Exception
      */
     private function detectResponseType()
     {
-        if (! request()->expectsJson()) {
-            session()->flash('status-error', $this->getMessage());
-            return MurugoAuth::redirect();
-        }
-
         return response()->json($this->buildData(), $this->status);
     }
 

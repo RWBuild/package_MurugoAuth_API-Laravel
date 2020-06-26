@@ -37,11 +37,6 @@ class MurugoAuthDenied extends Exception
      */
     private function detectResponseType()
     {
-        if (! request()->expectsJson()) {
-            session()->flash('status-error', $this->getMessage());
-            return redirect('/');
-        }
-
         return response()->json($this->buildData(), $this->status);
     }
 
