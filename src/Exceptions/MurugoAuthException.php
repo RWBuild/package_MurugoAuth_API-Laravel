@@ -37,9 +37,6 @@ class MurugoAuthException extends Exception
      */
     private function detectResponseType()
     {
-        if (!request()->expectsJson()) {
-            return $this->redirect();
-        }
         return response()->json($this->buildData(), $this->status);
     }
 
@@ -53,13 +50,5 @@ class MurugoAuthException extends Exception
             'success' => false,
             'message' => $this->getMessage(),
         ];
-    }
-
-    /**
-     * This method redirect to murugo auth page
-     */
-    public function redirect()
-    {
-        return redirect()->away(env('MURUGO_LOGIN_URL'));
     }
 }

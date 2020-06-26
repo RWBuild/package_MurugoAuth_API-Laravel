@@ -23,7 +23,6 @@
     "laravel": {
       "providers": [
         "RwandaBuild\\MurugoAuth\\MurugoAuthServiceProvider",
-        "RwandaBuild\\MurugoAuth2\\MurugoAuth2ServiceProvider"
       ],
       "aliases": {
         "MurugoAuth": "RwandaBuild\\MurugoAuth\\Facades\\MurugoAuth",

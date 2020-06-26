@@ -10,7 +10,10 @@ namespace RwandaBuild\MurugoAuth;
 
 use GuzzleHttp\Client;
 use Illuminate\Support\Str;
+use GuzzleHttp\Exception\ClientException;
+use GuzzleHttp\Exception\ConnectException;
 use RwandaBuild\MurugoAuth\Exceptions\MurugoAuthDenied;
+use RwandaBuild\MurugoAuth\Exceptions\MurugoAuthException;
 use RwandaBuild\MurugoAuth\Exceptions\MurugoInvalidSateRequest;
 
 class MurugoAuthHandler
@@ -98,7 +101,7 @@ class MurugoAuthHandler
         $userTokens = $auth->checkRequestState()
             ->requestUserToken();
 
-        return $auth->userFromToken($userTokens['access_token']);
+        return $auth->userFromToken($userTokens);
     }
 
     /**
@@ -108,15 +111,19 @@ class MurugoAuthHandler
     {
         if (static::$stateLess) return new static;
 
-        $state = $this->request->session()->pull('murgo_auth_state');
-
+        $state = $this->request->session()->pull('murugo_auth_state');
+        
         // when error occured, redirect to welcome page
         if ($this->request->error) {
             throw new MurugoAuthDenied('Murugo Access denied');
         }
-
+       
         // when request state doesn't match, redirect to auth server
-        if (strlen($state) > 0 && $state === $this->request->state) {
+        if (! $state) {
+            throw new MurugoInvalidSateRequest('Wrong request state');
+        } 
+        
+        if($state != $this->request->state) {
             throw new MurugoInvalidSateRequest('Wrong request state');
         }
 
@@ -131,18 +138,29 @@ class MurugoAuthHandler
     {
         $url = $this->appInfo['murugo_url'] . '/oauth/token';
 
-        $response = $this->httpClient->post($url, [
-            'headers' => ['accept' => 'application/json'],
-            'form_params' => [
-                'grant_type' => 'authorization_code',
-                'client_id' => $this->appInfo['client_id'],
-                'client_secret' => $this->appInfo['client_secret'],
-                'redirect_uri' => $this->appInfo['redirect'],
-                'code' => $this->request->code,
-            ],
-        ]);
+        try{
+            $response = $this->httpClient->post($url, [
+                'headers' => [
+                    'accept' => 'application/json',
+                    'APPKEY' => $this->appInfo['murugo_app_key'],
+                    'AUTHVERSION' => 2
+                ],
+                'form_params' => [
+                    'grant_type' => 'authorization_code',
+                    'client_id' => $this->appInfo['client_id'],
+                    'client_secret' => $this->appInfo['client_secret'],
+                    'redirect_uri' => $this->appInfo['redirect'],
+                    'code' => $this->request->code,
+                ],
+            ]);
 
-        return json_decode((string)$response->getBody(), true);
+            return json_decode((string)$response->getBody(), true);
+
+        } catch (ClientException $exception) {
+            self::fireError($exception);
+        } catch (ConnectException $exception) {
+            throw new \Exception($exception->getMessage(), 400);
+        }
     }
 
     /**
@@ -151,23 +169,37 @@ class MurugoAuthHandler
      * @param $accessToken
      * @return object
      */
-    public static function userFromToken($accessToken)
+    public static function userFromToken(array $userTokens)
     {
-        $url = self::init()->appInfo['murugo_url'] . '/api/third-party/user';
+        $url = self::init()->appInfo['murugo_url'] . '/api/thirdparty-me';
 
-        $response = self::init()->httpClient->get($url, [
-            'headers' => [
-                'accept' => 'application/json',
-                'Authorization' => 'Bearer ' . $accessToken
-            ]
-        ]);
+        try {
+            $response = self::init()->httpClient->get($url, [
+                'headers' => [
+                    'accept' => 'application/json',
+                    'Authorization' => 'Bearer ' . $userTokens['access_token']
+                ]
+            ]);
+    
+            $userBundle = json_decode((string)$response->getBody(), true);
+          
+            return MurugoUserFormatter::get($userBundle, $userTokens);
+        } catch (ClientException $exception) {
+            self::fireError($exception);
+        } catch (ConnectException $exception) {
+            throw new \Exception($exception->getMessage(), 400);
+        }
+        
+    }
 
-        $userBundle = json_decode((string)$response->getBody(), true);
-
-        return MurugoUserFormatter::get($userBundle, $accessToken);
+    /**
+     * Throw guzzle request error that occurs in a friendly way
+     */
+    private static function fireError($exception)
+    {
+        $response = $exception->getResponse();
+        $statusCode = $response->getStatusCode();
+        throw new MurugoAuthException($exception->getMessage(), $statusCode);
     }
 }
-
-
-
 
