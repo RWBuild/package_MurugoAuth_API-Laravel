@@ -27,7 +27,7 @@ class MurugoUserFormatter
      * Init the class construct
      * @param array $user
      * @param array $userTokens
-     * @return Model/MurugoUser
+     * @return MurugoUser
      */
     public static function get(array $user, array $userTokens)
     {
@@ -38,7 +38,7 @@ class MurugoUserFormatter
 
     /**
      * Create or update an existing murugo user
-     * @return Model/MurugoUser
+     * @return MurugoUser
      */
     public function setUser()
     {
@@ -71,7 +71,8 @@ class MurugoUserFormatter
 
     /**
      * Update murugo user info
-     * @return Model/MurugoUser
+     * @param MurugoUser $murugoUser
+     * @return MurugoUser
      */
     private function updateUserTokens(MurugoUser $murugoUser)
     {

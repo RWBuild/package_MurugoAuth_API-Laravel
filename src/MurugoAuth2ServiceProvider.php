@@ -10,7 +10,6 @@
 namespace RwandaBuild\MurugoAuth;
 
 use Illuminate\Support\ServiceProvider;
-use RwandaBuild\MurugoAuth\Http\Controllers\AuthenticationController;
 
 
 class MurugoAuth2ServiceProvider extends ServiceProvider
