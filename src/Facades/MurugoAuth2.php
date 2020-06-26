@@ -15,6 +15,6 @@ class MurugoAuth2 extends Facade
 {
     protected static function getFacadeAccessor()
     {
-        return 'MurugoAuthHandler';
+        return 'MurugoAuth2';
     }
 }
