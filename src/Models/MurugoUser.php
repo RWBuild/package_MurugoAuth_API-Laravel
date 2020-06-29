@@ -12,7 +12,9 @@ class MurugoUser extends Model
 
     public function user()
     {
-        return $this->hasOne(\App\User::class);
+        $userModel = '\App\User';
+        if (!class_exists($userModel)) $userModel = '\App\Models\User';
+        return $this->hasOne($userModel);
     }
 
     public function murugo_one_time_tokens()
