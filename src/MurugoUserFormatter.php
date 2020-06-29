@@ -27,7 +27,7 @@ class MurugoUserFormatter
      * Init the class construct
      * @param array $user
      * @param array $userTokens
-     * @return Model/MurugoUser
+     * @return MurugoUser
      */
     public static function get(array $user, array $userTokens)
     {
@@ -38,15 +38,15 @@ class MurugoUserFormatter
 
     /**
      * Create or update an existing murugo user
-     * @return Model/MurugoUser
+     * @return MurugoUser
      */
     public function setUser()
     {
         $murugoUser = MurugoUser::where('murugo_user_id', $this->user['hashed_murugo_user_id'])->first();
 
-        if (! $murugoUser) return  $this->createUser();
+        if (!$murugoUser) return $this->createUser();
 
-        return $this->updateUserTokens($murugoUser);
+        return $this->updateMurugoUser($murugoUser);
 
     }
 
@@ -71,9 +71,10 @@ class MurugoUserFormatter
 
     /**
      * Update murugo user info
-     * @return Model/MurugoUser
+     * @param MurugoUser $murugoUser
+     * @return MurugoUser
      */
-    private function updateUserTokens(MurugoUser $murugoUser)
+    private function updateMurugoUser(MurugoUser $murugoUser)
     {
         $murugoUser->update([
             'name' => $this->user['name'],
@@ -85,5 +86,23 @@ class MurugoUserFormatter
         ]);
 
         return $murugoUser->fresh();
+    }
+
+    /**
+     * Update tokens and token info of the user
+     * @param MurugoUser $murugoUser
+     * @param $tokens
+     * @return MurugoUser
+     */
+    public static function updateAccessToken(MurugoUser $murugoUser, $tokens)
+    {
+        $murugoUser->update([
+            'token' => $tokens['access_token'],
+            'refresh_token' => $tokens['refresh_token'],
+            'token_expires_at' => now()->addSeconds($tokens['expires_in'])
+        ]);
+
+        return $murugoUser->fresh();
+
     }
 }

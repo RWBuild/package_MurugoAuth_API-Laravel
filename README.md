@@ -14,38 +14,99 @@ Package that will be used for Murugo auth to all 3rd party laravel projects with
 composer require rwandabuild/murugo_api_auth
 ```
 
-#### 2. Include the following variables in ENV file and replace them your their values
+#### 2. Include the following variables in config services file
 ```json
-MURUGO_URL= "MURUGO BASE URL/"
+    'murugo' => [
+        'client_id' => env('MURUGO_CLIENT_ID'),
+        'client_secret' => env('MURUGO_CLIENT_SECRET'),
+        'redirect' => env('APP_REDIRECT_URL', 'YOUR LOGIN REDIRECT URL'),
+        'murugo_url' => env('MURUGO_URL', 'MURUGO_URL'),
+        'murugo_app_key' => env('MURUGO_APP_KEY'),
+    ],
 ```
-
-#### 3. Use the following migration
-```php
-Schema::create('murugo_users', function (Blueprint $table) {
-    $table->bigIncrements('id');
-    $table->string('name');
-    $table->string('email')->unique();
-    $table->string('murugo_user_id');
-    $table->string('murugo_user_avatar');
-    $table->string('murugo_user_public_name');
-    $table->text('token');
-    $table->timestamp('token_expires_at')->nullable();
-    $table->timestamp('email_verified_at')->nullable();
-    $table->string('password')->nullable();
-    $table->rememberToken();
-    $table->timestamps();
-});
-```
-#### 4. Dont forget to publish your migration by running the following command
+#### 3. Dont forget to publish your migration by running the following command, when you want to upgrade 
 ```json
 php artisan vendor:publish
 ```
 
-#### 5. Create a login method in LoginController
-#### 6. in login method call the MurugoAuth::murugoUser();, or  that gives me the murugoUser model
-#### 7. Check weather the  murugoUser model has already a symbolic user: `murugoUser->user`
-#### 8. If There is not a symbolic user, Create one from murugoUser information
-#### 9. Then After, Create user session in web or user token for api
+#### 4. Use the following migration
+```php
+php artisan migrate
+```
+
+#### 5. Add method to redirect user to murugo
+```json
+   use RwandaBuild\MurugoAuth\Facades\MurugoAuth2;
+
+
+    public function redirectToMurugo()
+    {
+        return MurugoAuth2::redirect();
+    }
+```
+#### 6. Add a callback method to be used after the redirection
+```json
+   use RwandaBuild\MurugoAuth\Facades\MurugoAuth2;
+
+
+    public function murugoCallback()
+    { 
+        $murugoUser = MurugoAuth2::user()
+    }
+```
+#### 7. Package also comes with this following method
+```json
+
+    /**
+     * This one is used by client(mobile) to authenticate murugo users on their 3rd party servers
+     */
+   use RwandaBuild\MurugoAuth\Facades\MurugoAuth2;
+   $tokens = [
+               'access_token' => 'murugo_user_access_token'],
+              'refresh_token' => 'murugo_user_refresh_token',
+              'expires_in' => integer
+   ],
+   $murugoUser = MurugoAuth2::userFromToken($tokens);
+```
+#### 8. Add relationship between User and Murugo User models
+- Add a Trait built in the package already that makes relationship between User model and Murugo user model
+```json
+
+    use RwandaBuild\MurugoAuth\Traits\MurugoAuthHelper;
+    class User extends Authenticatable
+    {
+      use MurugoAuthHelper;
+    }
+```
+- To access the murugo user when you already have user model like the following:
+```json
+
+    $user = User::find(1);
+    // access the relationship
+    $murugoUser = $user->murugoUser;
+```
+
+- When you have a murugo user model and you need to the related user, you can do it in the following way:
+
+```json
+$murugoUser = MurugoAuth2::user();
+// accessing the related user
+$user = $murugoUser->user;
+```
+NOTES: By default package is using App\User model or App\Models|user for making relationship between your user and murugo user model
+#### 9. At this step this is how you refresh tokens
+
+First you should know that the Murugo user model keeps the ``access_token`` ``refresh_token`` and the `token_expires_at`
+, now in case you may need to refresh the token of an existing, just do it in the following way:
+
+```php
+$user = User::find(2);
+
+// refreshing murugo user token
+
+$murugoUser = MurugoAuth2::refreshToken($user->murugoUser);
+
+```
 ## By Default package will add the following api routes in your laravel project
 
 - api/murugo-auth >>> This route will be used to get response sent from murugo and save in your laravel project database

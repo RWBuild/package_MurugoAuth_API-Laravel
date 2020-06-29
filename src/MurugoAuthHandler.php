@@ -15,6 +15,7 @@ use GuzzleHttp\Exception\ConnectException;
 use RwandaBuild\MurugoAuth\Exceptions\MurugoAuthDenied;
 use RwandaBuild\MurugoAuth\Exceptions\MurugoAuthException;
 use RwandaBuild\MurugoAuth\Exceptions\MurugoInvalidSateRequest;
+use RwandaBuild\MurugoAuth\Models\MurugoUser;
 
 class MurugoAuthHandler
 {
@@ -112,18 +113,18 @@ class MurugoAuthHandler
         if (static::$stateLess) return new static;
 
         $state = $this->request->session()->pull('murugo_auth_state');
-        
+
         // when error occured, redirect to welcome page
         if ($this->request->error) {
             throw new MurugoAuthDenied('Murugo Access denied');
         }
-       
+
         // when request state doesn't match, redirect to auth server
-        if (! $state) {
+        if (!$state) {
             throw new MurugoInvalidSateRequest('Wrong request state');
-        } 
-        
-        if($state != $this->request->state) {
+        }
+
+        if ($state != $this->request->state) {
             throw new MurugoInvalidSateRequest('Wrong request state');
         }
 
@@ -138,7 +139,7 @@ class MurugoAuthHandler
     {
         $url = $this->appInfo['murugo_url'] . '/oauth/token';
 
-        try{
+        try {
             $response = $this->httpClient->post($url, [
                 'headers' => [
                     'accept' => 'application/json',
@@ -166,8 +167,10 @@ class MurugoAuthHandler
     /**
      * get user info from a provided token
      *
-     * @param $accessToken
+     * @param array $userTokens
      * @return object
+     * @throws \Exception
+     * @internal param $accessToken
      */
     public static function userFromToken(array $userTokens)
     {
@@ -180,26 +183,61 @@ class MurugoAuthHandler
                     'Authorization' => 'Bearer ' . $userTokens['access_token']
                 ]
             ]);
-    
+
             $userBundle = json_decode((string)$response->getBody(), true);
-          
+
             return MurugoUserFormatter::get($userBundle, $userTokens);
         } catch (ClientException $exception) {
             self::fireError($exception);
         } catch (ConnectException $exception) {
             throw new \Exception($exception->getMessage(), 400);
         }
-        
+
     }
 
     /**
      * Throw guzzle request error that occurs in a friendly way
+     * @param $exception
+     * @throws MurugoAuthException
      */
     private static function fireError($exception)
     {
         $response = $exception->getResponse();
         $statusCode = $response->getStatusCode();
         throw new MurugoAuthException($exception->getMessage(), $statusCode);
+    }
+
+    /**
+     * This function is used to get refreshToken of certain user
+     * @param MurugoUser $murugoUser
+     * @return MurugoUser
+     * @throws \Exception
+     */
+    public static function refreshToken(MurugoUser $murugoUser)
+    {
+        try {
+            $auth = self::init();
+            $url = $auth->appInfo['murugo_url'] . '/oauth/token';
+
+
+            $response = $auth->httpClient->post($url, [
+                'form_params' => [
+                    'grant_type' => 'refresh_token',
+                    'refresh_token' => $murugoUser->refresh_token,
+                    'client_id' => $auth->appInfo['client_id'],
+                    'client_secret' => $auth->appInfo['client_secret'],
+                    'scope' => '',
+                ],
+            ]);
+
+            $tokens = json_decode((string)$response->getBody(), true);
+
+            return MurugoUserFormatter::updateAccessToken($murugoUser, $tokens);
+        } catch (ClientException $exception) {
+            self::fireError($exception);
+        } catch (ConnectException $exception) {
+            throw new \Exception($exception->getMessage(), 400);
+        }
     }
 }
 
