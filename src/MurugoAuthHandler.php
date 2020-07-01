@@ -75,6 +75,7 @@ class MurugoAuthHandler
         $query = http_build_query([
             'client_id' => $auth->appInfo['client_id'],
             'redirect_uri' => $auth->appInfo['redirect'],
+            'app_key' => $auth->appInfo['murugo_app_key'],
             'response_type' => 'code',
             'scope' => '',
             'state' => $state,
