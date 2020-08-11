@@ -181,7 +181,7 @@ class MurugoAuthHandler
             $response = self::init()->httpClient->get($url, [
                 'headers' => [
                     'accept' => 'application/json',
-                    'APPKEY' => $this->appInfo['murugo_app_key'],
+                    'APPKEY' => self::init()->appInfo['murugo_app_key'],
                     'Authorization' => 'Bearer ' . $userTokens['access_token']
                 ]
             ]);
