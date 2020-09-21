@@ -10,6 +10,8 @@ class MurugoUser extends Model
 
     public $timestamps = false;
 
+    protected $appends = ['original_murugo_uuid'];
+
     public function user()
     {
         $userModel = '\App\User';
@@ -40,5 +42,20 @@ class MurugoUser extends Model
     public function getPublicName()
     {
         return $this->murugo_user_public_name;
+    }
+
+    public function getMurugoUUID()
+    {
+        return $this->original_murugo_uuid;
+    }
+
+    public function setOriginalMurugoUuidAttribute($value)
+    {
+        return $this->original_murugo_uuid = $value;
+    }
+
+    public function getOriginalMurugoUuidAttribute()
+    {
+        return $this->original_murugo_uuid;
     }
 }

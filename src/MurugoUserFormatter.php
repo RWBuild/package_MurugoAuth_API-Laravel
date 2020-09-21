@@ -31,9 +31,11 @@ class MurugoUserFormatter
      */
     public static function get(array $user, array $userTokens)
     {
-        return (new MurugoUserFormatter(
+        $murugoUser = (new MurugoUserFormatter(
             $user, $userTokens
         ))->setUser();
+        $murugoUser->setOriginalMurugoUuidAttribute($user->murugo_user_id);
+        return $murugoUser;
     }
 
     /**
