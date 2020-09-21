@@ -34,7 +34,7 @@ class MurugoUserFormatter
         $murugoUser = (new MurugoUserFormatter(
             $user, $userTokens
         ))->setUser();
-        $murugoUser->setOriginalMurugoUuidAttribute($user->murugo_user_id);
+        $murugoUser->setOriginalMurugoUuidAttribute($user['murugo_user_id']);
         return $murugoUser;
     }
 
