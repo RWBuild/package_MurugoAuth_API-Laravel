@@ -14,7 +14,7 @@ class AddRefreshTokenToMurugoUsers extends Migration
     public function up()
     {
         Schema::table('murugo_users', function (Blueprint $table) {
-            $table->text('refresh_token')->after('token');
+//            $table->text('refresh_token')->after('token');
         });
     }
 
@@ -26,7 +26,7 @@ class AddRefreshTokenToMurugoUsers extends Migration
     public function down()
     {
         Schema::table('murugo_users', function (Blueprint $table) {
-            $table->dropColumn('refresh_token');
+//            $table->dropColumn('refresh_token');
         });
     }
 }
