@@ -22,7 +22,7 @@ class MurugoAuthHandler
     /**
      * This variable will be used to set dynamic foreign key on user model
      */
-    public static $foreignKey;
+    public static $foreignKey = 'murugo_user_id';
 
     /**
      * define weather request session will don't be used
