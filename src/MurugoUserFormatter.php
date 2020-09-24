@@ -31,9 +31,10 @@ class MurugoUserFormatter
      */
     public static function get(array $user, array $userTokens)
     {
-        $murugoUser = (new MurugoUserFormatter(
-            $user, $userTokens
-        ))->setUser();
+        //Instantiating class object and call none static function setUser()
+        //Return model of created or updated one
+        $murugoUser = (new self($user, $userTokens))->setUser();
+        //sets murugo_user_id attribute of the model
         $murugoUser->setOriginalMurugoUuidAttribute($user['murugo_user_id']);
         return $murugoUser;
     }
@@ -49,7 +50,6 @@ class MurugoUserFormatter
         if (!$murugoUser) return $this->createUser();
 
         return $this->updateMurugoUser($murugoUser);
-
     }
 
     /**

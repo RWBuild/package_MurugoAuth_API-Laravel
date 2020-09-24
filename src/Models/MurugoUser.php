@@ -3,6 +3,7 @@
 namespace RwandaBuild\MurugoAuth\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use RwandaBuild\MurugoAuth\MurugoAuthHandler;
 
 class MurugoUser extends Model
 {
@@ -16,12 +17,7 @@ class MurugoUser extends Model
     {
         $userModel = '\App\User';
         if (!class_exists($userModel)) $userModel = '\App\Models\User';
-        return $this->hasOne($userModel);
-    }
-
-    public function murugo_one_time_tokens()
-    {
-        return $this->hasMany(MurugoOneTimeToken::class);
+        return $this->hasOne($userModel, MurugoAuthHandler::getForeignKey());
     }
 
     public function getAtName()

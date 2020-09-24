@@ -20,6 +20,11 @@ use RwandaBuild\MurugoAuth\Models\MurugoUser;
 class MurugoAuthHandler
 {
     /**
+     * This variable will be used to set dynamic foreign key on user model
+     */
+    public static $foreignKey;
+
+    /**
      * define weather request session will don't be used
      */
     protected static $stateLess = false;
@@ -56,11 +61,11 @@ class MurugoAuthHandler
     }
 
     /**
-     * build instance of the class
+     * Build instance of the class, to allow to access on none static function
      */
     public static function init()
     {
-        return new MurugoAuthHandler();;
+        return new self;
     }
 
     /**
@@ -68,7 +73,7 @@ class MurugoAuthHandler
      */
     public static function redirect()
     {
-        $auth = self::init();
+        $auth = static::init();
         $auth->request->session()
             ->put('murugo_auth_state', $state = Str::random(40));
 
@@ -89,7 +94,7 @@ class MurugoAuthHandler
      */
     public static function stateless()
     {
-        static::$stateLess = true;
+        self::$stateLess = true;
 
         return new static;
     }
@@ -99,10 +104,13 @@ class MurugoAuthHandler
      */
     public static function user()
     {
+        //return instance of current class in this case MurugoAuthHandler
         $auth = self::init();
-        $userTokens = $auth->checkRequestState()
-            ->requestUserToken();
-
+        //check the status of the request
+        $auth->checkRequestState();
+        //request user tokens
+        $userTokens = $auth->requestUserToken();
+        //Return user object with those tokens
         return $auth->userFromToken($userTokens);
     }
 
@@ -111,11 +119,11 @@ class MurugoAuthHandler
      */
     private function checkRequestState()
     {
-        if (static::$stateLess) return new static;
+        if (self::$stateLess) return;
 
         $state = $this->request->session()->pull('murugo_auth_state');
 
-        // when error occured, redirect to welcome page
+        // when error occurred, redirect to welcome page
         if ($this->request->error) {
             throw new MurugoAuthDenied('Murugo Access denied');
         }
@@ -129,7 +137,7 @@ class MurugoAuthHandler
             throw new MurugoInvalidSateRequest('Wrong request state');
         }
 
-        return new static;
+        return;
     }
 
     /**
@@ -194,7 +202,6 @@ class MurugoAuthHandler
         } catch (ConnectException $exception) {
             throw new \Exception($exception->getMessage(), 400);
         }
-
     }
 
     /**
@@ -221,7 +228,6 @@ class MurugoAuthHandler
             $auth = self::init();
             $url = $auth->appInfo['murugo_url'] . '/oauth/token';
 
-
             $response = $auth->httpClient->post($url, [
                 'form_params' => [
                     'grant_type' => 'refresh_token',
@@ -240,6 +246,24 @@ class MurugoAuthHandler
         } catch (ConnectException $exception) {
             throw new \Exception($exception->getMessage(), 400);
         }
+    }
+
+    /**
+     * Function that sets the foreign key
+     * @param $value
+     * @return mixed
+     */
+    public static function setForeignKey($value)
+    {
+        return self::$foreignKey = $value;
+    }
+
+    /**
+     * Function that get the value of the foreign key
+     */
+    public static function getForeignKey()
+    {
+        return self::$foreignKey;
     }
 }
 

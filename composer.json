@@ -26,7 +26,6 @@
       ],
       "aliases": {
         "MurugoAuth": "RwandaBuild\\MurugoAuth\\Facades\\MurugoAuth",
-        "MurugoAuth2": "RwandaBuild\\MurugoAuth\\Facades\\MurugoAuth2"
       }
     }
   }

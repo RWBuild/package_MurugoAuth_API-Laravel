@@ -3,7 +3,6 @@
 namespace RwandaBuild\MurugoAuth\Exceptions;
 
 use Exception;
-use RwandaBuild\MurugoAuth\Facades\MurugoAuth2;
 
 class MurugoInvalidSateRequest extends Exception
 {
@@ -33,7 +32,7 @@ class MurugoInvalidSateRequest extends Exception
     }
 
     /**
-     * reponse for web and ip request
+     * Reponse for web and ip request
      */
     private function detectResponseType()
     {
