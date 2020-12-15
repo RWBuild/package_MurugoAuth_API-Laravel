@@ -35,7 +35,8 @@ class MurugoUserFormatter
         //Return model of created or updated one
         $murugoUser = (new self($user, $userTokens))->setUser();
         //sets murugo_user_id attribute of the model
-        $murugoUser->setOriginalMurugoUuidAttribute($user['murugo_user_id']);
+        $murugoUserId = !empty($user['murugo_user_id']) ? $user['murugo_user_id'] : $user['hashed_murugo_user_id'];
+        $murugoUser->setOriginalMurugoUuidAttribute($murugoUserId);
         return $murugoUser;
     }
 
@@ -47,7 +48,9 @@ class MurugoUserFormatter
     {
         $murugoUser = MurugoUser::where('murugo_user_id', $this->user['hashed_murugo_user_id'])->first();
 
-        if (!$murugoUser) return $this->createUser();
+        if (!$murugoUser) {
+            return $this->createUser();
+        }
 
         return $this->updateMurugoUser($murugoUser);
     }
@@ -65,7 +68,7 @@ class MurugoUserFormatter
             'refresh_token' => $this->userTokens['refresh_token'],
             'token_expires_at' => now()->addSeconds($this->userTokens['expires_in']),
             'murugo_user_avatar' => $this->user['avatar'],
-            'murugo_user_public_name' => $this->user['public_name']
+            'murugo_user_public_name' => $this->user['public_name'],
         ]);
 
         return $murugoUser;
@@ -101,7 +104,7 @@ class MurugoUserFormatter
         $murugoUser->update([
             'token' => $tokens['access_token'],
             'refresh_token' => $tokens['refresh_token'],
-            'token_expires_at' => now()->addSeconds($tokens['expires_in'])
+            'token_expires_at' => now()->addSeconds($tokens['expires_in']),
         ]);
 
         return $murugoUser->fresh();
