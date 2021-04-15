@@ -10,10 +10,7 @@
     }
   ],
   "minimum-stability": "dev",
-  "require": {
-    "guzzlehttp/guzzle": "^6.5",
-    "doctrine/dbal": "2.11.3"
-  },
+  "require": {},
   "autoload": {
     "psr-4": {
       "RwandaBuild\\MurugoAuth\\": "src/"
