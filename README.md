@@ -36,22 +36,22 @@ php artisan migrate
 
 #### 5. Add method to redirect user to murugo
 ```json
-   use RwandaBuild\MurugoAuth\Facades\MurugoAuth2;
+   use RwandaBuild\MurugoAuth\Facades\MurugoAuth;
 
 
     public function redirectToMurugo()
     {
-        return MurugoAuth2::redirect();
+        return MurugoAuth::redirect();
     }
 ```
 #### 6. Add a callback method to be used after the redirection
 ```json
-   use RwandaBuild\MurugoAuth\Facades\MurugoAuth2;
+   use RwandaBuild\MurugoAuth\Facades\MurugoAuth;
 
 
     public function murugoCallback()
     { 
-        $murugoUser = MurugoAuth2::user()
+        $murugoUser = MurugoAuth::user()
     }
 ```
 #### 7. Package also comes with this following method
@@ -60,13 +60,13 @@ php artisan migrate
     /**
      * This one is used by client(mobile) to authenticate murugo users on their 3rd party servers
      */
-   use RwandaBuild\MurugoAuth\Facades\MurugoAuth2;
+   use RwandaBuild\MurugoAuth\Facades\MurugoAuth;
    $tokens = [
                'access_token' => 'murugo_user_access_token'],
               'refresh_token' => 'murugo_user_refresh_token',
               'expires_in' => integer
    ],
-   $murugoUser = MurugoAuth2::userFromToken($tokens);
+   $murugoUser = MurugoAuth::userFromToken($tokens);
 ```
 #### 8. Add relationship between User and Murugo User models
 - Add a Trait built in the package already that makes relationship between User model and Murugo user model
@@ -89,7 +89,7 @@ php artisan migrate
 - When you have a murugo user model and you need to the related user, you can do it in the following way:
 
 ```json
-$murugoUser = MurugoAuth2::user();
+$murugoUser = MurugoAuth::user();
 // accessing the related user
 $user = $murugoUser->user;
 ```
@@ -104,7 +104,7 @@ $user = User::find(2);
 
 // refreshing murugo user token
 
-$murugoUser = MurugoAuth2::refreshToken($user->murugoUser);
+$murugoUser = MurugoAuth::refreshToken($user->murugoUser);
 
 ```
 ## By Default package will add the following api routes in your laravel project
