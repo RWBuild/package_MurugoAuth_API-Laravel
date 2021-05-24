@@ -101,8 +101,9 @@ class MurugoAuthHandler
 
     /**
      * get user from a provided his authorized code
+     * @param $userCallback the callback function to be called when the request is successful
      */
-    public static function user()
+    public static function user($userCallback = null)
     {
         //return instance of current class in this case MurugoAuthHandler
         $auth = self::init();
@@ -111,7 +112,7 @@ class MurugoAuthHandler
         //request user tokens
         $userTokens = $auth->requestUserToken();
         //Return user object with those tokens
-        return $auth->userFromToken($userTokens);
+        return $auth->userFromToken($userTokens, $userCallback);
     }
 
     /**
@@ -196,7 +197,15 @@ class MurugoAuthHandler
 
             $userBundle = json_decode((string)$response->getBody(), true);
 
-            return MurugoUserFormatter::get($userBundle, $userTokens);
+            $murugoUser = MurugoUserFormatter::get($userBundle, $userTokens);
+
+            if(!is_callable($userCallback)) return $murugoUser;
+
+            $userDetails = MurugoUserFormatter::getUserDetails(
+                $userBundle
+            );
+
+            return $callback($murugoUser, $userDetails);
         } catch (ClientException $exception) {
             self::fireError($exception);
         } catch (ConnectException $exception) {

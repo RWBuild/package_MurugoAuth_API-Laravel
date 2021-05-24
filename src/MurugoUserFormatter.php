@@ -110,4 +110,17 @@ class MurugoUserFormatter
         return $murugoUser->fresh();
 
     }
+
+    /**
+     * Get user additional details to support the user invite service
+     * @param $user user bundle
+     */
+    public static function getUserDetails($user)
+    {
+        return [
+            'is_invited' => $user['is_invited'] ?? false,
+            'invite_token' => $user['invite_token'] ?? null
+        ];
+    }
+    
 }
