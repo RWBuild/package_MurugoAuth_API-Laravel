@@ -182,7 +182,7 @@ class MurugoAuthHandler
      * @throws \Exception
      * @internal param $accessToken
      */
-    public static function userFromToken(array $userTokens)
+    public static function userFromToken(array $userTokens, $userCallback = null)
     {
         $url = self::init()->appInfo['murugo_url'] . '/api/thirdparty-me';
 
@@ -196,7 +196,6 @@ class MurugoAuthHandler
             ]);
 
             $userBundle = json_decode((string)$response->getBody(), true);
-
             $murugoUser = MurugoUserFormatter::get($userBundle, $userTokens);
 
             if(!is_callable($userCallback)) return $murugoUser;
