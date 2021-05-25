@@ -204,7 +204,7 @@ class MurugoAuthHandler
                 $userBundle
             );
 
-            return $callback($murugoUser, $userDetails);
+            return $userCallback($murugoUser, $userDetails);
         } catch (ClientException $exception) {
             self::fireError($exception);
         } catch (ConnectException $exception) {
@@ -261,7 +261,7 @@ class MurugoAuthHandler
      * @param $value
      * @return mixed
      */
-    public static function setForeignKey($value)
+    public static function Key($value)
     {
         return self::$foreignKey = $value;
     }
