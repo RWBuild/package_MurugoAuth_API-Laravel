@@ -44,16 +44,49 @@ php artisan migrate
         return MurugoAuth::redirect();
     }
 ```
-#### 6. Add a callback method to be used after the redirection
+#### 6. Add a callback method to be used after the redirection or when using the stateless method
+
+a)  When you need only the murugo user model
+
 ```json
    use RwandaBuild\MurugoAuth\Facades\MurugoAuth;
-
 
     public function murugoCallback()
     { 
         $murugoUser = MurugoAuth::user()
+        
+        // or using the stateless way for SPAs
+         MurugoAuth::stateless()->user()
     }
 ```
+
+b) When you need extra details from the user being authenticated, you will need to use a callback
+
+```json
+    public function murugoCallback()
+    { 
+        /**
+        * @param MurugoUser $murugoUser
+        * @param array $userDetails
+        */
+        $userCallback = function($murugoUser, $userDetails) {
+            // cook your stuff here...
+        };
+        
+        // then pass your callback here
+        $murugoUser = MurugoAuth::user($userCallback);
+
+        // either way, you can grab the data in a fancy way like
+        $userWithDetails = MurugoUser::user(fn($murugoUser,$userDetails) => ([
+            $murugoUser, $userDetails
+        ]));
+
+        //then get what you want using it's index
+        $murugoUser = $userWithDetails[0] // for the murugo user
+
+    }
+```
+
 #### 7. Package also comes with this following method
 ```json
 
@@ -93,6 +126,13 @@ $murugoUser = MurugoAuth::user();
 // accessing the related user
 $user = $murugoUser->user;
 ```
+
+- When you want to customize the foreign key that the package will use for your relationship, you can set it up from one of your service providers:
+```json
+$murugoUser = MurugoAuth::Key('custom_child_key');
+```
+
+
 NOTES: By default package is using App\User model or App\Models|user for making relationship between your user and murugo user model
 #### 9. At this step this is how you refresh tokens
 
