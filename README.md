@@ -15,6 +15,11 @@ composer require rwandabuild/murugo_api_auth
 ```
 
 #### 2. Include the following variables in config services file
+
+First Party Applications are allowed to authenticate with the password client token grant, which means that the provided `client_id` will be from a passport password grant client generated using `php artisan passport:client --password`
+
+The following configuration will include `use_password_token_grant` when the first party application is using password token grant.
+
 ```json
     'murugo' => [
         'client_id' => env('MURUGO_CLIENT_ID'),
@@ -22,8 +27,10 @@ composer require rwandabuild/murugo_api_auth
         'redirect' => env('APP_REDIRECT_URL', 'YOUR LOGIN REDIRECT URL'),
         'murugo_url' => env('MURUGO_URL', 'MURUGO_URL'),
         'murugo_app_key' => env('MURUGO_APP_KEY'),
+        'use_password_token_grant' => true|false
     ],
 ```
+
 #### 3. Dont forget to publish your migration by running the following command, when you want to upgrade 
 ```json
 php artisan vendor:publish
@@ -35,6 +42,9 @@ php artisan migrate
 ```
 
 #### 5. Add method to redirect user to murugo
+
+For First Party Authorizations, the user will need to include some extra params
+
 ```json
    use RwandaBuild\MurugoAuth\Facades\MurugoAuth;
 
