@@ -138,7 +138,7 @@ $user = $murugoUser->user;
 
 - When you want to customize the foreign key that the package will use for your relationship, you can set it up from one of your service providers:
 ```json
-$murugoUser = MurugoAuth::Key('custom_child_key');
+$murugoUser = MurugoAuth::setForeignKey('custom_child_key');
 ```
 
 
