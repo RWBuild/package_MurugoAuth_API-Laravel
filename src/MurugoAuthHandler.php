@@ -52,7 +52,7 @@ class MurugoAuthHandler
 
 
     /** Using password token grant */
-    public $usePasswordTokenGrant = false;
+    public $disableUserSession = false;
 
     /**
      * initialize the class
@@ -63,8 +63,7 @@ class MurugoAuthHandler
         $this->request = request();
         $this->httpClient = new Client;
 
-        $this->usePasswordTokenGrant = config('services.murugo.use_password_token_grant')
-        ?? $this->usePasswordTokenGrant;
+        $this->disableUserSession = config('services.murugo.disable_user_session') ?? false;
     }
 
     /**
@@ -88,7 +87,7 @@ class MurugoAuthHandler
             $auth->formatAuthorizationQuery($state)
         );
 
-        $authorizeURL = $auth->usePasswordTokenGrant
+        $authorizeURL = $auth->disableUserSession
             ? '/oauth/authorize-first-party?'
             : '/oauth/authorize?';
 
@@ -116,8 +115,6 @@ class MurugoAuthHandler
         //check the status of the request
         $auth->checkRequestState();
         //request user tokens
-        $auth->checkForPasswordGrantToken();
-
         $userTokens = $auth->requestUserToken();
         //Return user object with those tokens
         return $auth->userFromToken($userTokens, $userCallback);
@@ -129,7 +126,7 @@ class MurugoAuthHandler
     private function checkRequestState()
     {
         if (self::$stateLess) return;
-
+        
         $state = $this->request->session()->pull('murugo_auth_state');
 
         // when error occurred, redirect to welcome page
@@ -156,8 +153,6 @@ class MurugoAuthHandler
     public function requestUserToken()
     {
         $url = $this->appInfo['murugo_url'] . '/oauth/token';
-
-        if ($this->usePasswordTokenGrant) return $this->userTokens;
 
         try {
             $response = $this->httpClient->post($url, [
@@ -271,7 +266,7 @@ class MurugoAuthHandler
      * @param $value
      * @return mixed
      */
-    public static function Key($value)
+    public static function setForeignKey($value)
     {
         return self::$foreignKey = $value;
     }
@@ -284,32 +279,19 @@ class MurugoAuthHandler
         return self::$foreignKey;
     }
 
+    /**
+     * Format thirdparty authorization query
+     * @param string $state
+     */
     protected function formatAuthorizationQuery(string $state)
     {
-        $query = [
+        return [
+            'response_type' => 'code',
             'client_id' => $this->appInfo['client_id'],
             'redirect_uri' => $this->appInfo['redirect'],
             'app_key' => $this->appInfo['murugo_app_key'],
             'scope' => '',
             'state' => $state,
-        ];
-
-        (!$this->usePasswordTokenGrant)
-            ? $query['response_type'] = 'code'
-            : $query['grant_type'] = 'password';
-
-        return $query;
-    }
-
-    protected function checkForPasswordGrantToken()
-    {
-        if (!$this->usePasswordTokenGrant) return;
-
-        $this->userTokens = [
-            'access_token' => $this->request->access_token,
-            'refresh_token' => $this->request->refresh_token,
-            'expires_in' => $this->request->expires_in,
-            'token_type' => $this->request->token_type
         ];
     }
 }

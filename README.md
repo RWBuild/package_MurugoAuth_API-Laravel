@@ -16,9 +16,8 @@ composer require rwandabuild/murugo_api_auth
 
 #### 2. Include the following variables in config services file
 
-First Party Applications are allowed to authenticate with the password client token grant, which means that the provided `client_id` will be from a passport password grant client generated using `php artisan passport:client --password`
+First Party application can authenticate via browser without saving user sessions. In order to achieve that the `disable_user_session` configuration should be set to `true` in the config file.
 
-The following configuration will include `use_password_token_grant` when the first party application is using password token grant.
 
 ```json
     'murugo' => [
@@ -27,7 +26,7 @@ The following configuration will include `use_password_token_grant` when the fir
         'redirect' => env('APP_REDIRECT_URL', 'YOUR LOGIN REDIRECT URL'),
         'murugo_url' => env('MURUGO_URL', 'MURUGO_URL'),
         'murugo_app_key' => env('MURUGO_APP_KEY'),
-        'use_password_token_grant' => true|false
+        'disable_user_session' => true|false
     ],
 ```
 
