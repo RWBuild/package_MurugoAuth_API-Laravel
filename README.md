@@ -16,7 +16,7 @@ composer require rwandabuild/murugo_api_auth
 
 #### 2. Include the following variables in config services file
 
-First Party application can authenticate via browser without saving user sessions. In order to achieve that the `disable_user_session` configuration should be set to `true` in the config file.
+First Party applications can authenticate via browser without saving user sessions. In order to achieve that the `disable_user_session` configuration should be set to `true` in the config file.
 
 
 ```json
