@@ -50,6 +50,10 @@ class MurugoAuthHandler
      */
     public $userTokens;
 
+
+    /** Using password token grant */
+    public $disableUserSession = false;
+
     /**
      * initialize the class
      */
@@ -58,6 +62,8 @@ class MurugoAuthHandler
         $this->appInfo = config('services.murugo');
         $this->request = request();
         $this->httpClient = new Client;
+
+        $this->disableUserSession = config('services.murugo.disable_user_session') ?? false;
     }
 
     /**
@@ -77,16 +83,15 @@ class MurugoAuthHandler
         $auth->request->session()
             ->put('murugo_auth_state', $state = Str::random(40));
 
-        $query = http_build_query([
-            'client_id' => $auth->appInfo['client_id'],
-            'redirect_uri' => $auth->appInfo['redirect'],
-            'app_key' => $auth->appInfo['murugo_app_key'],
-            'response_type' => 'code',
-            'scope' => '',
-            'state' => $state,
-        ]);
+        $query = http_build_query(
+            $auth->formatAuthorizationQuery($state)
+        );
 
-        return redirect()->away($auth->appInfo['murugo_url'] . '/oauth/authorize?' . $query);
+        $authorizeURL = $auth->disableUserSession
+            ? '/oauth/authorize-first-party?'
+            : '/oauth/authorize?';
+
+        return redirect()->away($auth->appInfo['murugo_url'] . $authorizeURL . $query);
     }
 
     /**
@@ -121,7 +126,7 @@ class MurugoAuthHandler
     private function checkRequestState()
     {
         if (self::$stateLess) return;
-
+        
         $state = $this->request->session()->pull('murugo_auth_state');
 
         // when error occurred, redirect to welcome page
@@ -261,7 +266,7 @@ class MurugoAuthHandler
      * @param $value
      * @return mixed
      */
-    public static function Key($value)
+    public static function setForeignKey($value)
     {
         return self::$foreignKey = $value;
     }
@@ -273,5 +278,20 @@ class MurugoAuthHandler
     {
         return self::$foreignKey;
     }
-}
 
+    /**
+     * Format thirdparty authorization query
+     * @param string $state
+     */
+    protected function formatAuthorizationQuery(string $state)
+    {
+        return [
+            'response_type' => 'code',
+            'client_id' => $this->appInfo['client_id'],
+            'redirect_uri' => $this->appInfo['redirect'],
+            'app_key' => $this->appInfo['murugo_app_key'],
+            'scope' => '',
+            'state' => $state,
+        ];
+    }
+}

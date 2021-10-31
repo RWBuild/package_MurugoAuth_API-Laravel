@@ -15,6 +15,10 @@ composer require rwandabuild/murugo_api_auth
 ```
 
 #### 2. Include the following variables in config services file
+
+First Party application can authenticate via browser without saving user sessions. In order to achieve that the `disable_user_session` configuration should be set to `true` in the config file.
+
+
 ```json
     'murugo' => [
         'client_id' => env('MURUGO_CLIENT_ID'),
@@ -22,8 +26,10 @@ composer require rwandabuild/murugo_api_auth
         'redirect' => env('APP_REDIRECT_URL', 'YOUR LOGIN REDIRECT URL'),
         'murugo_url' => env('MURUGO_URL', 'MURUGO_URL'),
         'murugo_app_key' => env('MURUGO_APP_KEY'),
+        'disable_user_session' => true|false
     ],
 ```
+
 #### 3. Dont forget to publish your migration by running the following command, when you want to upgrade 
 ```json
 php artisan vendor:publish
@@ -35,6 +41,9 @@ php artisan migrate
 ```
 
 #### 5. Add method to redirect user to murugo
+
+For First Party Authorizations, the user will need to include some extra params
+
 ```json
    use RwandaBuild\MurugoAuth\Facades\MurugoAuth;
 
