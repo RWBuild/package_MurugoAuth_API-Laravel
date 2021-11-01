@@ -160,7 +160,7 @@ $murugoUser = MurugoAuth::refreshToken($user->murugoUser);
 ## By Default, package will add the following api routes in your laravel project
 
 - api/murugo-auth >>> This route will be used to get response sent from murugo and save in your laravel project database
-- api/authenticate-user >>>This route will authenticate user by checking `uuid` of user and by checking if his token is still valid ,and if true, it will return the user object
+- api/authenticate-user >>>This route will authenticate user by checking `uuid` of user and by checking if his token is still valid, and if true, it will return the user object
 - api/logout >>> This route will logout user on murugo server
 ## Follow RwandaBuild bellow and contact us
 
