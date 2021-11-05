@@ -16,7 +16,7 @@ composer require rwandabuild/murugo_api_auth
 
 #### 2. Include the following variables in config services file
 
-First Party applications can authenticate via browser without saving user sessions. In order to achieve that the `disable_user_session` configuration should be set to `true` in the config file.
+First Party applications can authenticate via browser without saving user sessions. In order to achieve that, the `disable_user_session` configuration should be set to `true` in the config file.
 
 
 ```json
@@ -30,7 +30,7 @@ First Party applications can authenticate via browser without saving user sessio
     ],
 ```
 
-#### 3. Dont forget to publish your migration by running the following command, when you want to upgrade 
+#### 3. Don't forget to publish your migration by running the following command, when you want to upgrade
 ```json
 php artisan vendor:publish
 ```
@@ -55,7 +55,7 @@ For First Party Authorizations, the user will need to include some extra params
 ```
 #### 6. Add a callback method to be used after the redirection or when using the stateless method
 
-a)  When you need only the murugo user model
+a) When you need only the murugo user model:
 
 ```json
    use RwandaBuild\MurugoAuth\Facades\MurugoAuth;
@@ -69,7 +69,7 @@ a)  When you need only the murugo user model
     }
 ```
 
-b) When you need extra details from the user being authenticated, you will need to use a callback
+b) When you need extra details from the user being authenticated, you will need to use a callback:
 
 ```json
     public function murugoCallback()
@@ -142,24 +142,25 @@ $murugoUser = MurugoAuth::setForeignKey('custom_child_key');
 ```
 
 
-NOTES: By default package is using App\User model or App\Models|user for making relationship between your user and murugo user model
-#### 9. At this step this is how you refresh tokens
+NOTES: By default, package is using `App\User` model or `App\Models|user` for making relationship between your user and Murugo user model
 
-First you should know that the Murugo user model keeps the ``access_token`` ``refresh_token`` and the `token_expires_at`
-, now in case you may need to refresh the token of an existing, just do it in the following way:
+#### 9. At this step, this is how you refresh tokens
+
+First, you should know that the Murugo user model keeps the ``access_token``, ``refresh_token`` and the `token_expires_at`
+, now in case you may need to refresh the token of an existing user, just do it in the following way:
 
 ```php
 $user = User::find(2);
 
-// refreshing murugo user token
+// Refreshing murugo user token
 
 $murugoUser = MurugoAuth::refreshToken($user->murugoUser);
 
 ```
-## By Default package will add the following api routes in your laravel project
+## By Default, package will add the following api routes in your laravel project
 
 - api/murugo-auth >>> This route will be used to get response sent from murugo and save in your laravel project database
-- api/authenticate-user >>>This route will authenticate user by checking uuid of user and by checking if token is still valid and if true return user object
+- api/authenticate-user >>>This route will authenticate user by checking `uuid` of user and by checking if his token is still valid, and if true, it will return the user object
 - api/logout >>> This route will logout user on murugo server
 ## Follow RwandaBuild bellow and contact us
 
