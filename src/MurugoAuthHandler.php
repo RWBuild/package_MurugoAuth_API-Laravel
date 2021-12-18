@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created by PhpStorm.
  * User: User
@@ -53,6 +54,11 @@ class MurugoAuthHandler
 
     /** Using password token grant */
     public $disableUserSession = false;
+
+    /**
+     * Dynamic redirect url
+     */
+    public static $redirectUrl;
 
     /**
      * initialize the class
@@ -126,7 +132,7 @@ class MurugoAuthHandler
     private function checkRequestState()
     {
         if (self::$stateLess) return;
-        
+
         $state = $this->request->session()->pull('murugo_auth_state');
 
         // when error occurred, redirect to welcome page
@@ -165,13 +171,12 @@ class MurugoAuthHandler
                     'grant_type' => 'authorization_code',
                     'client_id' => $this->appInfo['client_id'],
                     'client_secret' => $this->appInfo['client_secret'],
-                    'redirect_uri' => $this->appInfo['redirect'],
+                    'redirect_uri' => $this->getRedirectUrl(),
                     'code' => $this->request->code,
                 ],
             ]);
 
             return json_decode((string)$response->getBody(), true);
-
         } catch (ClientException $exception) {
             self::fireError($exception);
         } catch (ConnectException $exception) {
@@ -203,7 +208,7 @@ class MurugoAuthHandler
             $userBundle = json_decode((string)$response->getBody(), true);
             $murugoUser = MurugoUserFormatter::get($userBundle, $userTokens);
 
-            if(!is_callable($userCallback)) return $murugoUser;
+            if (!is_callable($userCallback)) return $murugoUser;
 
             $userDetails = MurugoUserFormatter::getUserDetails(
                 $userBundle
@@ -288,10 +293,35 @@ class MurugoAuthHandler
         return [
             'response_type' => 'code',
             'client_id' => $this->appInfo['client_id'],
-            'redirect_uri' => $this->appInfo['redirect'],
+            'redirect_uri' => $this->getRedirectUrl(),
             'app_key' => $this->appInfo['murugo_app_key'],
             'scope' => '',
             'state' => $state,
         ];
+    }
+
+    /**
+     * Set the redirect url in a more dynamic way
+     * The authentication will work only when the provided redirect url is accepted by the OAUTH Server
+     * @param string $redirectUrl
+     * @return static
+     */
+    public static function setRedirectUrl(string $redirectUrl = null)
+    {
+        if (!$redirectUrl) return new static;
+
+        self::$redirectUrl = $redirectUrl;
+
+        return new static;
+    }
+
+    /**
+     * Get the redirect url
+     * This will return a dynamic url or fallback to the default configuration
+     * @return string
+     */
+    public function getRedirectUrl()
+    {
+        return self::$redirectUrl ?? $this->appInfo['redirect'];
     }
 }
