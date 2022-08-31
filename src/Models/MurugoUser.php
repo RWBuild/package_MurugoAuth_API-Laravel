@@ -47,11 +47,11 @@ class MurugoUser extends Model
 
     public function setOriginalMurugoUuidAttribute($value)
     {
-        return $this->original_murugo_uuid = $value;
+        return $this->attributes['original_murugo_uuid'] = $value;
     }
 
     public function getOriginalMurugoUuidAttribute()
     {
-        return $this->original_murugo_uuid;
+        return $this->original_murugo_uuid ?? null;
     }
 }

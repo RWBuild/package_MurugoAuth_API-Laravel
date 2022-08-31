@@ -36,7 +36,7 @@ class MurugoUserFormatter
         $murugoUser = (new self($user, $userTokens))->setUser();
         //sets murugo_user_id attribute of the model
         $murugoUserId = !empty($user['murugo_user_id']) ? $user['murugo_user_id'] : $user['hashed_murugo_user_id'];
-        $murugoUser->setOriginalMurugoUuidAttribute($murugoUserId);
+        $murugoUser->original_murugo_uuid = $murugoUserId;
         return $murugoUser;
     }
 
