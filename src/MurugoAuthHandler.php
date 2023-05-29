@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created by PhpStorm.
  * User: User
@@ -125,16 +126,26 @@ class MurugoAuthHandler
 
         // when error occurred, redirect to welcome page
         if ($this->request->error) {
-            throw new MurugoAuthDenied('Murugo Access denied');
+            return view('murugo::state-error')->with('message', 'Murugo Access denied');
         }
 
         // when request state doesn't match, redirect to auth server
         if (!$state) {
-            throw new MurugoInvalidSateRequest('Wrong request state');
+            $redirectIf = function () {
+                static::redirect();
+            };
+            $message = "Wrong request state";
+
+            return view('murugo::state-error', compact('message', 'redirectIf'));
         }
 
         if ($state != $this->request->state) {
-            throw new MurugoInvalidSateRequest('Wrong request state');
+            $redirectIf = function () {
+                static::redirect();
+            };
+            $message = "Wrong request state";
+
+            return view('murugo::state-error', compact('message', 'redirectIf'));
         }
 
         return;
@@ -165,7 +176,6 @@ class MurugoAuthHandler
             ]);
 
             return json_decode((string)$response->getBody(), true);
-
         } catch (ClientException $exception) {
             self::fireError($exception);
         } catch (ConnectException $exception) {
@@ -266,4 +276,3 @@ class MurugoAuthHandler
         return self::$foreignKey;
     }
 }
-
