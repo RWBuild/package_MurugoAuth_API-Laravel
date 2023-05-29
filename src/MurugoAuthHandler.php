@@ -142,21 +142,15 @@ class MurugoAuthHandler
 
         // when request state doesn't match, redirect to auth server
         if (!$state) {
-            $redirectIf = function () {
-                static::redirect();
-            };
-            $message = "Wrong request state";
+            $message = "Invalid request state";
 
-            return view('murugo::state-error', compact('message', 'redirectIf'));
+            return view('murugo::state-error', compact('message'));
         }
 
         if ($state != $this->request->state) {
-            $redirectIf = function () {
-                static::redirect();
-            };
             $message = "Wrong request state";
 
-            return view('murugo::state-error', compact('message', 'redirectIf'));
+            return view('murugo::state-error', compact('message'));
         }
 
         return;

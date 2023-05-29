@@ -11,7 +11,9 @@
 <body>
     {{$message}}
 
-    <i onclick="{{ redirectIf() }}">login</i>
+    @inject('MurugoAuth', RwandaBuild\MurugoAuth\Facades\MurugoAuth::class)
+
+    <a href="{{ $MurugoAuth::redirect()->getTargetUrl() }}">Login</a>
 </body>
 
 </html>
