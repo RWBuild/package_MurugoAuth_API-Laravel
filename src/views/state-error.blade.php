@@ -6,17 +6,10 @@
     <meta name="authoring-tool" content="Murugo Cloud" />
     <title>Murugo Cloud</title>
     <link rel="icon" href="images/Icon@1x.png" type="image/gif" sizes="16x16" />
-    <link rel="stylesheet" href="{{ asset('./css/splashstyle.css') }}" />
-    <link rel="stylesheet" href="{{ asset('./css/app.css') }}" />
-    <link rel="stylesheet" href="{{ asset('./css/dashboard.css') }}" />
-    <script src="{{ asset('js/jquery.min.js') }}"></script>
-    <script src="https://kit.fontawesome.com/c3877622d0.js" crossorigin="anonymous"></script>
+       <script src="https://kit.fontawesome.com/c3877622d0.js" crossorigin="anonymous"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no" />
     <!-- Global site tag (gtag.js) - Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=UA-140040130-2"></script>
-    <script src="{{ mix('js/app.js') }}" defer></script>
-    <script src="https://code.jquery.com/jquery-3.4.1.js" integrity="sha256-WpOohJOqMqqyKL9FccASB9O0KwACQJpFTUBLTYOVvVU="
-        crossorigin="anonymous"></script>
     <style>
         .error-conatiner {
             width: 100%;
