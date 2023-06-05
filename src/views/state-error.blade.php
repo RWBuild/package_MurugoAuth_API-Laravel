@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+
 <head>
     <meta charset="UTF-8" />
     <meta name="authoring-tool" content="Murugo Cloud" />
@@ -16,7 +17,18 @@
     <script src="{{ mix('js/app.js') }}" defer></script>
     <script src="https://code.jquery.com/jquery-3.4.1.js" integrity="sha256-WpOohJOqMqqyKL9FccASB9O0KwACQJpFTUBLTYOVvVU="
         crossorigin="anonymous"></script>
-   
+    <style>
+        .error-conatiner {
+            width: 100%;
+            text-align: center;
+        }
+
+        .error-conatiner a {
+            text-decoration: none;
+            color: #3490dc;
+            margin-top: 20px
+        }
+    </style>
 </head>
 <body>
     <div class="murugo-top-section-wrapper" style="height:20vh">
@@ -27,10 +39,11 @@
             </div>
         </div>
     </div>
-    <div>
+    <div class="error-conatiner">
         {{ $message }}
         @inject('MurugoAuth', RwandaBuild\MurugoAuth\Facades\MurugoAuth::class)
         <a href="{{ $MurugoAuth::redirect()->getTargetUrl() }}">Login</a>
     </div>
 </body>
+
 </html>
