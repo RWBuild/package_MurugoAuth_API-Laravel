@@ -147,14 +147,14 @@ class MurugoAuthHandler
 
         // when request state doesn't match, redirect to auth server
         if (!$state) {
-            $message = "Invalid request state";
+            $message = "Invalid request state , Please try again!";
             $view = view('murugo::state-error', compact('message'))->render();
 
             throw new HttpResponseException(response($view, Response::HTTP_INTERNAL_SERVER_ERROR));
         }
 
         if ($state != $this->request->state) {
-            $message = "Wrong request state";
+            $message = "Wrong request state , Please try again!";
             $view = view('murugo::state-error', compact('message'))->render();
 
             throw new HttpResponseException(response($view, Response::HTTP_INTERNAL_SERVER_ERROR));
