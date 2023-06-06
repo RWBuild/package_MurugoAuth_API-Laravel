@@ -25,5 +25,13 @@
         "MurugoAuth": "RwandaBuild\\MurugoAuth\\Facades\\MurugoAuth"
       }
     }
+  },
+  "scripts": {
+    "post-install-cmd": [
+      "@php artisan vendor:publish --tag=murugo-public"
+    ],
+    "post-update-cmd": [
+      "@php artisan vendor:publish --tag=murugo-public"
+    ]
   }
 }

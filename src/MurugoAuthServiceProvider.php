@@ -36,6 +36,10 @@ class MurugoAuthServiceProvider extends ServiceProvider
             __DIR__ . '/database/migrations/' => database_path('migrations')
         ], 'migrations');
 
-        $this->loadViewsFrom(__DIR__ . '/views', 'murugo');
+        $this->publishes([
+            __DIR__ . '/../public' => public_path('vendor/rwandabuild/murugo_api_auth/'),
+        ], 'murugo-public');
+
+        $this->loadViewsFrom(__DIR__ . '/views/Murugo Cloud Animation/MurugoCloud Animation HTML', 'murugo');
     }
 }
