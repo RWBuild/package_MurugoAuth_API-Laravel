@@ -27,6 +27,7 @@
     <div class="murugo-top-section-wrapper" style="height:20vh">
         <div class="murugo-top-section-container bg-white">
             <div id="murugocloudanimation_hype_container">
+                <script  type="text/javascript" src="../public/js/murugocloudanimation_hype_generated_script.js"></script>
                 <script type="text/javascript" charset="utf-8"
                     src="{{ asset('js/murugocloudanimation_hype_generated_script.js?92246') }}"></script>
             </div>

@@ -1,0 +1,31 @@
+//	HYPE.documents["MurugoCloud Animation"]
+
+(function(){(function k(){function l(a,b,d){var c=!1;null==window[a]&&(null==window[b]?(window[b]=[],window[b].push(k),a=document.getElementsByTagName("head")[0],b=document.createElement("script"),c=h,false==!0&&(c=""),b.type="text/javascript",b.src=c+"/"+d,a.appendChild(b)):window[b].push(k),c=!0);return c}var h="MurugoCloud%20Animation.hyperesources",c="MurugoCloud Animation",e="murugocloudanimation_hype_container";if(false==!1)try{for(var f=document.getElementsByTagName("script"),
+a=0;a<f.length;a++){var b=f[a].src,d=null!=b?b.indexOf("/murugocloudanimation_hype_generated_script.js"):-1;if(-1!=d){h=b.substr(0,d);break}}}catch(n){}if(false==!1&&(a=navigator.userAgent.match(/MSIE (\d+\.\d+)/),a=parseFloat(a&&a[1])||null,a=l("HYPE_598","HYPE_dtl_598",!0==(null!=a&&10>a||false==!0)?"HYPE-598.full.min.js":"HYPE-598.thin.min.js"),false==!0&&(a=a||l("HYPE_w_598","HYPE_wdtl_598","HYPE-598.waypoints.min.js")),a))return;f=window.HYPE.documents;
+if(null!=f[c]){b=1;a=c;do c=""+a+"-"+b++;while(null!=f[c]);d=document.getElementsByTagName("div");b=!1;for(a=0;a<d.length;a++)if(d[a].id==e&&null==d[a].getAttribute("HYP_dn")){var b=1,g=e;do e=""+g+"-"+b++;while(null!=document.getElementById(e));d[a].id=e;b=!0;break}if(!1==b)return}b=[];b=[];d={};g={};for(a=0;a<b.length;a++)try{g[b[a].identifier]=b[a].name,d[b[a].name]=eval("(function(){return "+b[a].source+"})();")}catch(m){window.console&&window.console.log(m),d[b[a].name]=
+function(){}}a=new HYPE_598(c,e,{"10":{p:1,n:"Pasted-3.png",g:"33",o:true,t:"@1x"},"2":{p:1,n:"Pasted-1.png",g:"11",o:true,t:"@1x"},"-2":{n:"blank.gif"},"3":{p:1,n:"Pasted-1_2x.png",g:"11",o:true,t:"@2x"},"11":{p:1,n:"Pasted-3_2x.png",g:"33",o:true,t:"@2x"},"4":{p:1,n:"Pasted-2.png",g:"25",o:true,t:"@1x"},"5":{p:1,n:"Pasted-2_2x.png",g:"25",o:true,t:"@2x"},"6":{p:1,n:"Pasted-4.png",g:"29",o:true,t:"@1x"},"7":{p:1,n:"Pasted-4_2x.png",g:"29",o:true,t:"@2x"},"-1":{n:"PIE.htc"},"0":{p:1,n:"Pasted.png",g:"9",o:true,t:"@1x"},"8":{p:1,n:"Pasted-5.png",g:"31",o:true,t:"@1x"},"1":{p:1,n:"Pasted_2x.png",g:"9",o:true,t:"@2x"},"9":{p:1,n:"Pasted-5_2x.png",g:"31",o:true,t:"@2x"}},h,[],d,[{n:"Web 1240 Open",o:"1",X:[0]}],[{o:"3",p:"600px",cA:false,Y:2000,Z:300,L:[],c:"#FFFFFF",bY:1,d:2000,U:{},T:{"65":{i:"65",n:"Loop Timeline",z:10,b:[],a:[{f:"c",y:0,z:5,i:"a",e:296,s:280,o:"79"},{f:"c",y:0,z:3,i:"b",e:92,s:86,o:"83"},{y:0,i:"e",s:1,z:0,o:"84",f:"c"},{y:0,i:"b",s:2,z:0,o:"85",f:"c"},{f:"c",y:0,z:5,i:"a",e:346,s:308,o:"80"},{f:"c",y:0,z:6,i:"a",e:295,s:280,o:"83"},{f:"c",y:0,z:4,i:"a",e:251,s:264,o:"82"},{f:"c",y:3,z:7,i:"b",e:86,s:92,o:"83"},{f:"c",y:4,z:6,i:"a",e:264,s:251,o:"82"},{f:"c",y:5,z:5,i:"a",e:308,s:346,o:"80"},{f:"c",y:5,z:5,i:"a",e:280,s:296,o:"79"},{f:"c",y:6,z:4,i:"a",e:280,s:295,o:"83"},{f:"c",p:2,y:10,z:0,i:"ActionHandler",s:{a:[{i:0,b:"65",p:9,symbolOid:"2"}]},o:"65"},{y:10,i:"b",s:86,z:0,o:"83",f:"c"},{y:10,i:"a",s:308,z:0,o:"80",f:"c"},{y:10,i:"a",s:280,z:0,o:"79",f:"c"},{y:10,i:"a",s:280,z:0,o:"83",f:"c"},{y:10,i:"a",s:264,z:0,o:"82",f:"c"}],f:30},kTimelineDefaultIdentifier:{i:"kTimelineDefaultIdentifier",n:"Main Timeline",z:10.01,b:[],a:[{f:"c",y:0,z:4,i:"a",e:296,s:280,o:"79"},{f:"c",y:0,z:5,i:"b",e:92,s:86,o:"83"},{f:"c",y:0,z:4,i:"a",e:346,s:308,o:"80"},{f:"c",y:0,z:10.01,i:"b",e:10,s:232,o:"85"},{f:"c",y:0,z:5,i:"a",e:295,s:280,o:"83"},{f:"c",y:0,z:2,i:"a",e:255,s:264,o:"82"},{f:"c",y:2,z:8,i:"a",e:264,s:255,o:"82"},{f:"c",y:4,z:6,i:"a",e:308,s:346,o:"80"},{f:"c",y:4,z:6,i:"a",e:280,s:296,o:"79"},{f:"c",y:5,z:5,i:"b",e:86,s:92,o:"83"},{f:"c",y:5,z:5,i:"a",e:280,s:295,o:"83"},{f:"c",y:6,z:3.29,i:"e",e:1,s:0,o:"84"},{y:9.29,i:"e",s:1,z:0,o:"84",f:"c"},{f:"c",p:2,y:10,z:0,i:"ActionHandler",s:{a:[{b:"65",p:3,z:false,symbolOid:"2"}]},o:"kTimelineDefaultIdentifier"},{y:10,i:"b",s:86,z:0,o:"83",f:"c"},{y:10,i:"a",s:280,z:0,o:"79",f:"c"},{y:10,i:"a",s:280,z:0,o:"83",f:"c"},{y:10,i:"a",s:264,z:0,o:"82",f:"c"},{y:10,i:"a",s:308,z:0,o:"80",f:"c"},{y:10.01,i:"b",s:10,z:0,o:"85",f:"c"}],f:30}},bZ:180,O:["81","85","84","82","83","80","79"],n:"Untitled Layout","_":0,v:{"81":{c:1679,bS:32,d:258,I:"None",J:"None",K:"None",g:"#00A3E4",L:"None",M:0,w:"",N:0,A:"#D8DDE4",x:"visible",j:"absolute",B:"#D8DDE4",k:"div",O:0,C:"#D8DDE4",z:1,P:0,D:"#D8DDE4",a:0,b:-1},"84":{h:"11",p:"no-repeat",x:"visible",a:218,q:"100% 100%",b:37,j:"absolute",dB:"img",z:3,k:"div",c:284,d:42,r:"inline",e:0},"79":{w:"",h:"25",p:"no-repeat",x:"visible",a:280,q:"100% 100%",b:101,j:"absolute",dB:"img",z:8,k:"div",c:1240,d:233.59200000000001,r:"inline",cQ:1.5,cR:1.5},"82":{w:"",h:"31",p:"no-repeat",x:"visible",a:264,q:"100% 100%",b:54,dB:"img",j:"absolute",z:4,k:"div",c:1240,d:232.898,r:"inline",cQ:1.5,e:1,cR:1.5},"85":{h:"9",p:"no-repeat",x:"visible",a:518,q:"100% 100%",b:232,j:"absolute",dB:"img",z:2,k:"div",c:111,d:112,r:"inline"},"80":{w:"",h:"33",p:"no-repeat",x:"visible",a:308,q:"100% 100%",b:87,j:"absolute",dB:"img",z:6,k:"div",c:1240,d:226.589,r:"inline",cQ:1.5,cR:1.5},"83":{h:"29",p:"no-repeat",x:"visible",a:280,q:"100% 100%",b:86,j:"absolute",dB:"img",z:5,k:"div",c:1240,d:199.262,r:"inline",cQ:1.5,cR:1.5}}}],{},g,{},
+(function (shouldShow, mainContentContainer) {
+	var loadingPageID = mainContentContainer.id + "_loading";
+	var loadingDiv = document.getElementById(loadingPageID);
+
+	if(shouldShow == true) {
+		if(loadingDiv == null) {	
+			loadingDiv = document.createElement("div");
+			loadingDiv.id = loadingPageID;
+			loadingDiv.style.cssText = "overflow:hidden;position:absolute;width:150px;top:40%;left:0;right:0;margin:auto;padding:2px;border:3px solid #BBB;background-color:#EEE;border-radius:10px;text-align:center;font-family:Helvetica,Sans-Serif;font-size:13px;font-weight:700;color:#AAA;z-index:100000;";
+			loadingDiv.innerHTML = "Loading";
+			mainContentContainer.appendChild(loadingDiv);
+		}
+ 
+		loadingDiv.style.display = "block";
+		loadingDiv.removeAttribute("aria-hidden");
+		mainContentContainer.setAttribute("aria-busy", true);
+	} else {
+		loadingDiv.style.display = "none";
+		loadingDiv.setAttribute("aria-hidden", true);
+		mainContentContainer.removeAttribute("aria-busy");
+	}
+})
+
+,false,true,-1,true,true,false,true);f[c]=a.API;document.getElementById(e).setAttribute("HYP_dn",
+c);a.z_o(this.body)})();})();
