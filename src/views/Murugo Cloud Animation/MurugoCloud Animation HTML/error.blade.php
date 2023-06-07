@@ -32,13 +32,11 @@
             font-size: 20px;
         }
 
-
         .error-container a {
             text-decoration: none;
             color: #3490dc;
             font-size: 20px;
             margin-left: 10px;
-
         }
 
         #murugocloudanimation_hype_container {
@@ -50,12 +48,27 @@
         }
 
         @media screen and (max-width: 500px) {
+            body {
+                background-color: #FFFFFF;
+                margin: 0;
+                width: 100%;
+                height: 100%;
+            }
+
+            .error-container {
+                width: 1200px;
+                margin-top:300px;
+                display: flex;
+                flex-direction: row;
+                justify-content: center;
+                align-items: center;
+                font-size: 48px;
+
+            }
+
             .error-container a {
                 text-decoration: none;
-                color: #161d22;
-                font-size: 20px;
-                margin-left: 10px;
-
+                font-size: 48px;
             }
 
             #murugocloudanimation_hype_container {
