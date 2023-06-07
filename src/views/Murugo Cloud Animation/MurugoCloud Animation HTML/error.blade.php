@@ -18,30 +18,71 @@
             height: 100%;
         }
 
-        .error-conatiner {
+        .error-container {
             width: 100%;
             display: flex;
-            flex-direction: column;
+            flex-direction: row;
             justify-content: center;
             align-items: center;
+            font-size: 16px;
+
         }
 
-        .error-conatiner a {
+        .error-container p {
+            font-size: 20px;
+        }
+
+
+        .error-container a {
             text-decoration: none;
             color: #3490dc;
-            margin-top: 20px
+            font-size: 20px;
+            margin-left: 10px;
+
+        }
+
+        #murugocloudanimation_hype_container {
+            width: 100% !important;
+        }
+
+        .HYPE_scene {
+            width: 100% !important;
+        }
+
+        @media screen and (max-width: 500px) {
+            .error-container a {
+                text-decoration: none;
+                color: #161d22;
+                font-size: 20px;
+                margin-left: 10px;
+
+            }
+
+            #murugocloudanimation_hype_container {
+                min-width: 2000px !important;
+                height: 300px !important;
+            }
+
+            .HYPE_scene {
+                min-width: 2000px !important;
+            }
         }
     </style>
 </head>
 
 <body>
     <div id="murugocloudanimation_hype_container">
-        <script type="text/javascript" charset="utf-8" src="{{ asset('vendor/rwandabuild/murugo_api_auth/MurugoCloud%20Animation.hyperesources/murugocloudanimation_hype_generated_script.js?92246g')}}"></script>
+        <script type="text/javascript" charset="utf-8"
+            src="{{ asset('vendor/rwandabuild/murugo_api_auth/MurugoCloud%20Animation.hyperesources/murugocloudanimation_hype_generated_script.js?92246g') }}">
+        </script>
     </div>
-    <div class="error-conatiner">
+    <div class="error-container">
         {{ $message }}
-        @inject('MurugoAuth', RwandaBuild\MurugoAuth\Facades\MurugoAuth::class)
-        <a href="{{ $MurugoAuth::redirect()->getTargetUrl() }}">Login</a>
+        <p style="font-size:26px"> @inject('MurugoAuth', RwandaBuild\MurugoAuth\Facades\MurugoAuth::class)
+
+            <a href="{{ $MurugoAuth::redirect()->getTargetUrl() }}">Login</a>
+
+        </p>
     </div>
 </body>
 
