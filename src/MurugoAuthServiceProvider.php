@@ -40,6 +40,6 @@ class MurugoAuthServiceProvider extends ServiceProvider
             __DIR__ . '/../public' => public_path('vendor/rwandabuild/murugo_api_auth/'),
         ], 'murugo-public');
 
-        $this->loadViewsFrom(__DIR__ . '/views/Murugo Cloud Animation/MurugoCloud Animation HTML', 'murugo');
+        $this->loadViewsFrom(__DIR__ . '/views/murugo', 'murugo');
     }
 }

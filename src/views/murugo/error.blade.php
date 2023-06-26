@@ -24,6 +24,7 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
+            margin-top: 120px
         }
 
         .error-conatiner a {
@@ -35,8 +36,9 @@
 </head>
 
 <body>
-    <div id="murugocloudanimation_hype_container">
-        <script type="text/javascript" charset="utf-8" src="{{ asset('vendor/rwandabuild/murugo_api_auth/MurugoCloud%20Animation.hyperesources/murugocloudanimation_hype_generated_script.js?92246g')}}"></script>
+    <div>
+        <img src="{{ asset('vendor/rwandabuild/murugo_api_auth/menubg.png') }}" style="width:100%" />
+        {{-- <script type="text/javascript" charset="utf-8" src="{{ asset('vendor/rwandabuild/murugo_api_auth/MurugoCloud%20Animation.hyperesources/murugocloudanimation_hype_generated_script.js?92246g')}}"></script> --}}
     </div>
     <div class="error-conatiner">
         {{ $message }}
@@ -44,6 +46,5 @@
         <a href="{{ $MurugoAuth::redirect()->getTargetUrl() }}">Login</a>
     </div>
 </body>
-
 
 </html>
