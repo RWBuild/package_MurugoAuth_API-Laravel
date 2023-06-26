@@ -17,6 +17,8 @@ use RwandaBuild\MurugoAuth\Exceptions\MurugoAuthDenied;
 use RwandaBuild\MurugoAuth\Exceptions\MurugoAuthException;
 use RwandaBuild\MurugoAuth\Exceptions\MurugoInvalidSateRequest;
 use RwandaBuild\MurugoAuth\Models\MurugoUser;
+use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Http\Response;
 
 class MurugoAuthHandler
 {
@@ -137,16 +139,25 @@ class MurugoAuthHandler
 
         // when error occurred, redirect to welcome page
         if ($this->request->error) {
-            throw new MurugoAuthDenied('Murugo Access denied');
+            $message = "Murugo Access denied";
+            $view = view('murugo::error', compact('message'))->render();
+
+            throw new HttpResponseException(response($view, Response::HTTP_INTERNAL_SERVER_ERROR));
         }
 
         // when request state doesn't match, redirect to auth server
         if (!$state) {
-            throw new MurugoInvalidSateRequest('Wrong request state');
+            $message = "Invalid request state , Please try again!";
+            $view = view('murugo::error', compact('message'))->render();
+
+            throw new HttpResponseException(response($view, Response::HTTP_INTERNAL_SERVER_ERROR));
         }
 
         if ($state != $this->request->state) {
-            throw new MurugoInvalidSateRequest('Wrong request state');
+            $message = "Wrong request state , Please try again!";
+            $view = view('murugo::error', compact('message'))->render();
+
+            throw new HttpResponseException(response($view, Response::HTTP_INTERNAL_SERVER_ERROR));
         }
 
         return;
