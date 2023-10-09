@@ -42,8 +42,7 @@
     </div>
     <div class="error-conatiner">
         {{ $message }}
-        @inject('MurugoAuth', RwandaBuild\MurugoAuth\Facades\MurugoAuth::class)
-        <a href="{{ $MurugoAuth::redirect()->getTargetUrl() }}">Login</a>
+        <a href="{{ route('redirect') }}">Login</a>
     </div>
 </body>
 

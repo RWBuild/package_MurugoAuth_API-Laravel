@@ -11,7 +11,6 @@ namespace RwandaBuild\MurugoAuth;
 
 use Illuminate\Support\ServiceProvider;
 use RwandaBuild\MurugoAuth\MurugoAuthHandler;
-use RwandaBuild\MurugoAuth\Http\Controllers\AuthenticationController;
 
 class MurugoAuthServiceProvider extends ServiceProvider
 {
@@ -41,5 +40,7 @@ class MurugoAuthServiceProvider extends ServiceProvider
         ], 'murugo-public');
 
         $this->loadViewsFrom(__DIR__ . '/views/murugo', 'murugo');
+
+        $this->loadRoutesFrom(__DIR__ . '/routes/v1/web.php');
     }
 }
