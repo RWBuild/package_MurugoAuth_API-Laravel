@@ -1,6 +1,6 @@
 <?php
 
-namespace RwandaBuild\MurugoAuth\Http\Controllers;
+namespace RwandaBuild\MurugoAuth\Http\Controllers\V1;
 
 use Carbon\Carbon;
 use Illuminate\Http\Request;

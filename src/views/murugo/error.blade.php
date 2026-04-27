@@ -42,7 +42,7 @@
     </div>
     <div class="error-conatiner">
         {{ $message }}
-        <a href="{{ route('redirect') }}">Login</a>
+        <a href="{{ route('murugo.auth.redirect') }}">Login</a>
     </div>
 </body>
 
