@@ -16,6 +16,8 @@ abstract class TestCase extends Orchestra
 
     protected function defineEnvironment($app)
     {
+        // host apps always have an APP_KEY; Testbench has none (needed for the encrypted tokens, F-9)
+        $app['config']->set('app.key', 'base64:' . base64_encode(str_repeat('k', 32)));
         $app['config']->set('database.default', 'testing');
         $app['config']->set('database.connections.testing', ['driver' => 'sqlite', 'database' => ':memory:', 'prefix' => '']);
         $app['config']->set('cache.default', 'array');
