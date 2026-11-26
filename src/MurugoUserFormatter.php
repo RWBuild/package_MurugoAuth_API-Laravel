@@ -8,10 +8,17 @@
 
 namespace RwandaBuild\MurugoAuth;
 
+use Illuminate\Contracts\Cache\LockTimeoutException;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 use RwandaBuild\MurugoAuth\Models\MurugoUser;
 
 class MurugoUserFormatter
 {
+    // declared: dynamic properties are deprecated since PHP 8.2
+    private $user;
+    private $userTokens;
+
     /**
      * MurugoUserFormatter constructor.
      * @param array $user
@@ -46,13 +53,83 @@ class MurugoUserFormatter
      */
     public function setUser()
     {
-        $murugoUser = MurugoUser::where('murugo_user_id', $this->user['hashed_murugo_user_id'])->first();
+        $hashedId = $this->user['hashed_murugo_user_id'];
 
-        if (!$murugoUser) {
-            return $this->createUser();
+        // S-13: two logins of the same person at the same time (double click, retry) could both
+        // find no row and both insert one. The lock makes them run one after the other.
+        return self::withUserLock($hashedId, function () use ($hashedId) {
+            $murugoUser = self::findMurugoUser($hashedId);
+
+            if (!$murugoUser) {
+                return $this->createUser();
+            }
+
+            return $this->updateMurugoUser($murugoUser);
+        });
+    }
+
+    /**
+     * S-13: run $callback while holding a cache lock for this Murugo user.
+     * Works across servers with redis / memcached / database cache, on one server with the
+     * file cache. If the lock can't be used (cache without lock support, database cache
+     * without the `cache_locks` table, cache down) or isn't free within 5 seconds, the callback
+     * runs without it (as before) rather than failing the login. Errors from the callback
+     * itself are not caught.
+     */
+    private static function withUserLock($hashedId, callable $callback)
+    {
+        $lock = null;
+
+        try {
+            $lock = Cache::lock('murugo-auth:user:' . sha1((string) $hashedId), 10);
+            $lock->block(5);
+        } catch (LockTimeoutException $e) {
+            return $callback();
+        } catch (\Throwable $e) {
+            Log::warning('Murugo Auth: login lock unavailable, continuing without it', ['error' => $e->getMessage()]);
+
+            return $callback();
         }
 
-        return $this->updateMurugoUser($murugoUser);
+        try {
+            return $callback();
+        } finally {
+            try {
+                $lock->release();
+            } catch (\Throwable $e) {
+                // the lock expires by itself after 10 seconds
+            }
+        }
+    }
+
+    /**
+     * S-13: find the MurugoUser for a Murugo user id. When older duplicate rows exist, always
+     * pick the same one: the row a local user is linked to (MurugoUser::user()), otherwise the
+     * newest. Extra rows are logged, not deleted, since a local user may still point at one.
+     * @return MurugoUser|null
+     */
+    public static function findMurugoUser($hashedId)
+    {
+        $matches = MurugoUser::where('murugo_user_id', $hashedId)->orderByDesc('id')->get();
+
+        if ($matches->count() <= 1) {
+            return $matches->first();
+        }
+
+        $chosen = $matches->first(function (MurugoUser $murugoUser) {
+            try {
+                return $murugoUser->user()->exists();
+            } catch (\Throwable $e) {
+                return false; // host app has no link column
+            }
+        }) ?: $matches->first();
+
+        Log::warning('Murugo Auth: duplicate murugo_users rows for one Murugo user', [
+            'murugo_users_ids' => $matches->pluck('id')->all(),
+            'used_id' => $chosen->id,
+        ]);
+
+        return $chosen;
     }
 
     /**

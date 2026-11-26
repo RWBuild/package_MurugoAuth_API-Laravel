@@ -13,3 +13,6 @@ npm-debug.log
 yarn-error.log
 .env
 .phpunit.result.cache
+
+# S-13: a library does not commit its lock file (apps resolve their own versions)
+composer.lock

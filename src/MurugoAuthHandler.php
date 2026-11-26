@@ -9,6 +9,7 @@
 
 namespace RwandaBuild\MurugoAuth;
 
+use Illuminate\Support\Facades\Log;
 use GuzzleHttp\Client;
 use Illuminate\Support\Str;
 use GuzzleHttp\Exception\ClientException;
@@ -63,13 +64,19 @@ class MurugoAuthHandler
     public static $redirectUrl;
 
     /**
+     * HTTP client used instead of a new one (tests only), see useHttpClient()
+     * @var \GuzzleHttp\Client|null
+     */
+    protected static $httpClientOverride = null;
+
+    /**
      * initialize the class
      */
     public function __construct()
     {
         $this->appInfo = config('services.murugo');
         $this->request = request();
-        $this->httpClient = new Client;
+        $this->httpClient = static::$httpClientOverride ?: new Client;
 
         $this->disableUserSession = config('services.murugo.disable_user_session') ?? false;
     }
@@ -191,7 +198,7 @@ class MurugoAuthHandler
         } catch (ClientException $exception) {
             self::fireError($exception);
         } catch (ConnectException $exception) {
-            throw new \Exception($exception->getMessage(), 400);
+            self::fireConnectError($exception);
         }
     }
 
@@ -229,7 +236,7 @@ class MurugoAuthHandler
         } catch (ClientException $exception) {
             self::fireError($exception);
         } catch (ConnectException $exception) {
-            throw new \Exception($exception->getMessage(), 400);
+            self::fireConnectError($exception);
         }
     }
 
@@ -242,7 +249,24 @@ class MurugoAuthHandler
     {
         $response = $exception->getResponse();
         $statusCode = $response->getStatusCode();
-        throw new MurugoAuthException($exception->getMessage(), $statusCode);
+
+        // S-12: Guzzle's message holds the Murugo URL and the start of its response body.
+        // Show a generic message; the details go to the log through the previous exception.
+        $message = in_array($statusCode, [401, 403])
+            ? 'Murugo login failed. Please sign in again.'
+            : 'Murugo login could not be completed. Please try again.';
+
+        throw new MurugoAuthException($message, $statusCode, $exception);
+    }
+
+    /**
+     * S-12: Murugo could not be reached (DNS, timeout, refused). Generic message for the user,
+     * cURL details in the log.
+     * @throws MurugoAuthException
+     */
+    private static function fireConnectError($exception)
+    {
+        throw new MurugoAuthException('Murugo is unreachable right now. Please try again later.', 503, $exception);
     }
 
     /**
@@ -273,8 +297,70 @@ class MurugoAuthHandler
         } catch (ClientException $exception) {
             self::fireError($exception);
         } catch (ConnectException $exception) {
-            throw new \Exception($exception->getMessage(), 400);
+            self::fireConnectError($exception);
         }
+    }
+
+    /**
+     * Log the user out of Murugo for this app (SSO logout):
+     *  - Murugo revokes this app's token for the user and ends the Murugo browser session
+     *    the user logged in from; other apps and other browsers are not affected
+     *  - the tokens stored on $murugoUser are cleared
+     * Call it from your logout route, then log the user out of your own app as usual.
+     * If the token has expired it is refreshed once first.
+     *
+     * @return bool true when Murugo confirmed the logout; false when it couldn't be reached or
+     *              refused (the local tokens are cleared anyway; the reason is logged)
+     */
+    public static function logout(MurugoUser $murugoUser): bool
+    {
+        $auth = self::init();
+
+        try {
+            try {
+                $auth->requestSsoLogout($murugoUser->token);
+            } catch (ClientException $exception) {
+                if ($exception->getResponse()->getStatusCode() !== 401 || !$murugoUser->refresh_token) {
+                    throw $exception;
+                }
+
+                // access token expired: refresh once and retry
+                $murugoUser = self::refreshToken($murugoUser);
+                $auth->requestSsoLogout($murugoUser->token);
+            }
+
+            $done = true;
+        } catch (\Throwable $exception) {
+            $previous = $exception->getPrevious() ?: $exception;
+            Log::warning('Murugo Auth: SSO logout failed', ['murugo_user_id' => $murugoUser->id, 'murugo_error' => $previous->getMessage()]);
+            $done = false;
+        }
+
+        $murugoUser->forceFill(['token' => '', 'refresh_token' => null, 'token_expires_at' => null])->save();
+
+        return $done;
+    }
+
+    /**
+     * POST /api/thirdparty-sso-logout on Murugo with the user's access token
+     */
+    private function requestSsoLogout($accessToken)
+    {
+        return $this->httpClient->post($this->appInfo['murugo_url'] . '/api/thirdparty-sso-logout', [
+            'headers' => [
+                'accept' => 'application/json',
+                'APPKEY' => $this->appInfo['murugo_app_key'],
+                'Authorization' => 'Bearer ' . $accessToken,
+            ],
+        ]);
+    }
+
+    /**
+     * Use this HTTP client instead of a new one (tests: a Guzzle MockHandler). null = default.
+     */
+    public static function useHttpClient(?Client $client = null)
+    {
+        static::$httpClientOverride = $client;
     }
 
     /**

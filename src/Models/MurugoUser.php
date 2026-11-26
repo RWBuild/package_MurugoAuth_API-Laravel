@@ -45,13 +45,20 @@ class MurugoUser extends Model
         return $this->original_murugo_uuid;
     }
 
+    /**
+     * S-09: the Murugo user id this login came with. Not a database column, so it is kept in a
+     * plain property: storing it in $attributes made save() fail (unknown column), and reading
+     * $this->original_murugo_uuid inside its own accessor called the accessor again forever.
+     */
+    protected $originalMurugoUuid = null;
+
     public function setOriginalMurugoUuidAttribute($value)
     {
-        return $this->attributes['original_murugo_uuid'] = $value;
+        $this->originalMurugoUuid = $value;
     }
 
     public function getOriginalMurugoUuidAttribute()
     {
-        return $this->original_murugo_uuid ?? null;
+        return $this->originalMurugoUuid;
     }
 }

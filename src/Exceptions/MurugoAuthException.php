@@ -16,10 +16,27 @@ class MurugoAuthException extends Exception
      */
     protected $status = 400;
 
-    public function __construct($message, $status = null)
+    /**
+     * S-12: $message is shown to the end user, so keep it generic. Pass the original error as
+     * $previous: its details go to the application log (see context()), never to the user.
+     */
+    public function __construct($message, $status = null, ?\Throwable $previous = null)
     {
-        parent::__construct($message);
+        parent::__construct($message, 0, $previous);
         $this->status = !$status ? $this->status : $status;
+    }
+
+    /**
+     * Laravel adds this to the log entry when the exception is reported.
+     */
+    public function context()
+    {
+        $previous = $this->getPrevious();
+
+        return $previous ? [
+            'murugo_status' => $this->status,
+            'murugo_error' => $previous->getMessage(),
+        ] : [];
     }
 
     /**

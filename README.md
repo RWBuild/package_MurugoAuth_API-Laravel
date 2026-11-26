@@ -157,11 +157,58 @@ $user = User::find(2);
 $murugoUser = MurugoAuth::refreshToken($user->murugoUser);
 
 ```
-## By Default, package will add the following api routes in your laravel project
+#### 10. Log out (SSO logout)
 
-- api/murugo-auth >>> This route will be used to get response sent from murugo and save in your laravel project database
-- api/authenticate-user >>>This route will authenticate user by checking `uuid` of user and by checking if his token is still valid, and if true, it will return the user object
-- api/logout >>> This route will logout user on murugo server
+`MurugoAuth::logout($murugoUser)` logs the user out of Murugo for your app: Murugo revokes your app's
+token for that user and ends the Murugo browser session the user logged in from. Other apps and
+other browsers of the user stay logged in. The tokens stored on the `MurugoUser` are cleared.
+
+```php
+use RwandaBuild\MurugoAuth\Facades\MurugoAuth;
+
+public function logout(Request $request)
+{
+    $user = $request->user();
+
+    MurugoAuth::logout($user->murugoUser); // true = Murugo confirmed; false = couldn't reach it (logged)
+
+    Auth::logout();                        // then log out of your own app as usual
+    $request->session()->invalidate();
+    $request->session()->regenerateToken();
+
+    return redirect('/');
+}
+```
+
+If the stored access token has expired, it is refreshed once before logging out. Even when Murugo
+can't be reached, call your own logout afterwards: the local tokens are cleared either way.
+
+#### 11. Publish the package assets
+
+The error page uses an image from the package. Publish it once (and after updating the package):
+
+```bash
+php artisan vendor:publish --tag=murugo-public
+```
+
+To do it automatically, add it to **your app's** `composer.json` (scripts in the package's own
+`composer.json` don't run in your app):
+
+```json
+"scripts": {
+    "post-update-cmd": [
+        "@php artisan vendor:publish --tag=murugo-public --force"
+    ]
+}
+```
+
+#### 12. Tests (package development)
+
+```bash
+composer require --dev orchestra/testbench phpunit/phpunit
+composer test
+```
+
 ## Follow RwandaBuild bellow and contact us
 
 - [Rwanda Build Website](https://rwandabuildprogram.com/)
