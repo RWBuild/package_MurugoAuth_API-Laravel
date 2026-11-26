@@ -193,6 +193,14 @@ can't be reached, call your own logout afterwards: the local tokens are cleared 
 
 `MurugoUser`'s `token` and `refresh_token` are in `$hidden`: they are not included by `toArray()` / `toJson()` (API responses, frontend props, a `User` with `murugoUser` loaded). Server code still reads `$murugoUser->token`. If you really need one in a response, use `$murugoUser->makeVisible('token')` on purpose.
 
+#### Tokens are encrypted in the database
+
+New `token` / `refresh_token` values are stored encrypted with your app's `APP_KEY` (`enc:` + Laravel encryption). `$murugoUser->token` still returns the plain token. Rows saved by older versions of the package (plain text) keep working and are encrypted the next time their tokens are saved (login or refresh); nothing to migrate.
+
+- Changing `APP_KEY` makes stored tokens unreadable (they read as `null`): users simply log in again.
+- Don't query on `token` (`where('token', ...)`): the stored value is encrypted.
+- If another service reads your `murugo_users` table directly, set `'encrypt_tokens' => false` in `services.murugo` (new tokens are then stored in plain text; already encrypted ones still read).
+
 #### 11. Publish the package assets
 
 The error page uses an image from the package. Publish it once (and after updating the package):

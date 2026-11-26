@@ -3,6 +3,7 @@
 namespace RwandaBuild\MurugoAuth\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use RwandaBuild\MurugoAuth\Casts\EncryptedToken;
 use RwandaBuild\MurugoAuth\MurugoAuthHandler;
 
 class MurugoUser extends Model
@@ -19,6 +20,14 @@ class MurugoUser extends Model
      * If you really must send one, call makeVisible('token') on purpose.
      */
     protected $hidden = ['token', 'refresh_token'];
+
+    /**
+     * F-9: tokens are encrypted in the database; old plain-text rows still read (see EncryptedToken)
+     */
+    protected $casts = [
+        'token' => EncryptedToken::class,
+        'refresh_token' => EncryptedToken::class,
+    ];
 
     public function user()
     {
