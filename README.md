@@ -73,6 +73,8 @@ a) When you need only the murugo user model:
     }
 ```
 
+`stateless()` skips the state check for that one `user()` call in the current request only. Call it each time, right before `user()`; it never carries over to later requests (Octane, queue workers).
+
 b) When you need extra details from the user being authenticated, you will need to use a callback:
 
 ```json

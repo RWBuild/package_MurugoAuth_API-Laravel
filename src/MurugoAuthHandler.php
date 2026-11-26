@@ -29,9 +29,12 @@ class MurugoAuthHandler
     public static $foreignKey = 'murugo_user_id';
 
     /**
-     * define weather request session will don't be used
+     * S-03: the request that stateless() was called for. The state check is skipped only for the
+     * next user() call on that same request, then this is cleared, so in a long-running process
+     * (Octane, queue workers) one stateless login can't switch the check off for later logins.
+     * @var \Illuminate\Http\Request|null
      */
-    protected static $stateLess = false;
+    protected static $statelessRequest = null;
 
     /**
      * authentication info of this application to murugo
@@ -118,7 +121,7 @@ class MurugoAuthHandler
      */
     public static function stateless()
     {
-        self::$stateLess = true;
+        self::$statelessRequest = request();
 
         return new static;
     }
@@ -144,7 +147,11 @@ class MurugoAuthHandler
      */
     private function checkRequestState()
     {
-        if (self::$stateLess) return;
+        // S-03: stateless() applies once, and only to the request it was called in
+        $stateless = self::$statelessRequest !== null && self::$statelessRequest === $this->request;
+        self::$statelessRequest = null;
+
+        if ($stateless) return;
 
         $state = $this->request->session()->pull('murugo_auth_state');
 
