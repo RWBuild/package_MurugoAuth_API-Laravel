@@ -9,11 +9,25 @@
       "email": "uweaime@gmail.com"
     }
   ],
-  "minimum-stability": "dev",
-  "require": {},
+  "minimum-stability": "stable",
+  "prefer-stable": true,
+  "require": {
+    "php": "^7.4|^8.0",
+    "guzzlehttp/guzzle": "^7.0",
+    "illuminate/cache": "^8.0|^9.0|^10.0|^11.0|^12.0",
+    "illuminate/database": "^8.0|^9.0|^10.0|^11.0|^12.0",
+    "illuminate/http": "^8.0|^9.0|^10.0|^11.0|^12.0",
+    "illuminate/routing": "^8.0|^9.0|^10.0|^11.0|^12.0",
+    "illuminate/support": "^8.0|^9.0|^10.0|^11.0|^12.0"
+  },
   "autoload": {
     "psr-4": {
       "RwandaBuild\\MurugoAuth\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "RwandaBuild\\MurugoAuth\\Tests\\": "tests/"
     }
   },
   "extra": {
@@ -27,11 +41,10 @@
     }
   },
   "scripts": {
-    "post-install-cmd": [
-      "@php artisan vendor:publish --tag=murugo-public"
-    ],
-    "post-update-cmd": [
-      "@php artisan vendor:publish --tag=murugo-public"
-    ]
+    "test": "phpunit"
+  },
+  "require-dev": {
+    "orchestra/testbench": "^10.12",
+    "phpunit/phpunit": "^11.5"
   }
 }

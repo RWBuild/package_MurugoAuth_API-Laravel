@@ -6,6 +6,9 @@ use Exception;
 
 class MurugoAuthDenied extends Exception
 {
+    // declared: dynamic properties are deprecated since PHP 8.2
+    protected $status = 403;
+
 
     public function __construct($message = '')
     {

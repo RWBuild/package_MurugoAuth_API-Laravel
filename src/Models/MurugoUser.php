@@ -3,6 +3,7 @@
 namespace RwandaBuild\MurugoAuth\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use RwandaBuild\MurugoAuth\Casts\EncryptedToken;
 use RwandaBuild\MurugoAuth\MurugoAuthHandler;
 
 class MurugoUser extends Model
@@ -12,6 +13,21 @@ class MurugoUser extends Model
     public $timestamps = false;
 
     protected $appends = ['original_murugo_uuid'];
+
+    /**
+     * S-08: the user's Murugo tokens never go out with toArray() / toJson() (API responses,
+     * Inertia / Livewire props, logs of a model). Server code still reads $murugoUser->token.
+     * If you really must send one, call makeVisible('token') on purpose.
+     */
+    protected $hidden = ['token', 'refresh_token'];
+
+    /**
+     * F-9: tokens are encrypted in the database; old plain-text rows still read (see EncryptedToken)
+     */
+    protected $casts = [
+        'token' => EncryptedToken::class,
+        'refresh_token' => EncryptedToken::class,
+    ];
 
     public function user()
     {
@@ -45,13 +61,20 @@ class MurugoUser extends Model
         return $this->original_murugo_uuid;
     }
 
+    /**
+     * S-09: the Murugo user id this login came with. Not a database column, so it is kept in a
+     * plain property: storing it in $attributes made save() fail (unknown column), and reading
+     * $this->original_murugo_uuid inside its own accessor called the accessor again forever.
+     */
+    protected $originalMurugoUuid = null;
+
     public function setOriginalMurugoUuidAttribute($value)
     {
-        return $this->attributes['original_murugo_uuid'] = $value;
+        $this->originalMurugoUuid = $value;
     }
 
     public function getOriginalMurugoUuidAttribute()
     {
-        return $this->original_murugo_uuid ?? null;
+        return $this->originalMurugoUuid;
     }
 }

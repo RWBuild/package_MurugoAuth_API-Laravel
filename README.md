@@ -24,11 +24,15 @@ First Party applications can authenticate via browser without saving user sessio
         'client_id' => env('MURUGO_CLIENT_ID'),
         'client_secret' => env('MURUGO_CLIENT_SECRET'),
         'redirect' => env('APP_REDIRECT_URL', 'YOUR LOGIN REDIRECT URL'),
-        'murugo_url' => env('MURUGO_URL', 'MURUGO_URL'),
+        'murugo_url' => env('MURUGO_URL'),          // e.g. https://murugo.cloud (with or without a trailing slash)
         'murugo_app_key' => env('MURUGO_APP_KEY'),
-        'disable_user_session' => true|false
+        'disable_user_session' => true|false,
+        'connect_timeout' => 5,                       // optional, seconds (default 5)
+        'timeout' => 15,                              // optional, seconds per request to Murugo (default 15)
     ],
 ```
+
+Requests to Murugo give up after `timeout` seconds; the user then sees "Murugo is unreachable right now" (`MurugoAuthException`, status 503). If `murugo_url` is missing or not an http(s) URL, the package logs an error and throws `MurugoAuthException` (status 500) instead of calling a wrong address.
 
 #### 3. Don't forget to publish your migration by running the following command, when you want to upgrade
 ```json
@@ -68,6 +72,8 @@ a) When you need only the murugo user model:
          MurugoAuth::stateless()->user()
     }
 ```
+
+`stateless()` skips the state check for that one `user()` call in the current request only. Call it each time, right before `user()`; it never carries over to later requests (Octane, queue workers).
 
 b) When you need extra details from the user being authenticated, you will need to use a callback:
 
@@ -157,11 +163,70 @@ $user = User::find(2);
 $murugoUser = MurugoAuth::refreshToken($user->murugoUser);
 
 ```
-## By Default, package will add the following api routes in your laravel project
+#### 10. Log out (SSO logout)
 
-- api/murugo-auth >>> This route will be used to get response sent from murugo and save in your laravel project database
-- api/authenticate-user >>>This route will authenticate user by checking `uuid` of user and by checking if his token is still valid, and if true, it will return the user object
-- api/logout >>> This route will logout user on murugo server
+`MurugoAuth::logout($murugoUser)` logs the user out of Murugo for your app: Murugo revokes your app's
+token for that user and ends the Murugo browser session the user logged in from. Other apps and
+other browsers of the user stay logged in. The tokens stored on the `MurugoUser` are cleared.
+
+```php
+use RwandaBuild\MurugoAuth\Facades\MurugoAuth;
+
+public function logout(Request $request)
+{
+    $user = $request->user();
+
+    MurugoAuth::logout($user->murugoUser); // true = Murugo confirmed; false = couldn't reach it (logged)
+
+    Auth::logout();                        // then log out of your own app as usual
+    $request->session()->invalidate();
+    $request->session()->regenerateToken();
+
+    return redirect('/');
+}
+```
+
+If the stored access token has expired, it is refreshed once before logging out. Even when Murugo
+can't be reached, call your own logout afterwards: the local tokens are cleared either way.
+
+#### Tokens are hidden from JSON
+
+`MurugoUser`'s `token` and `refresh_token` are in `$hidden`: they are not included by `toArray()` / `toJson()` (API responses, frontend props, a `User` with `murugoUser` loaded). Server code still reads `$murugoUser->token`. If you really need one in a response, use `$murugoUser->makeVisible('token')` on purpose.
+
+#### Tokens are encrypted in the database
+
+New `token` / `refresh_token` values are stored encrypted with your app's `APP_KEY` (`enc:` + Laravel encryption). `$murugoUser->token` still returns the plain token. Rows saved by older versions of the package (plain text) keep working and are encrypted the next time their tokens are saved (login or refresh); nothing to migrate.
+
+- Changing `APP_KEY` makes stored tokens unreadable (they read as `null`): users simply log in again.
+- Don't query on `token` (`where('token', ...)`): the stored value is encrypted.
+- If another service reads your `murugo_users` table directly, set `'encrypt_tokens' => false` in `services.murugo` (new tokens are then stored in plain text; already encrypted ones still read).
+
+#### 11. Publish the package assets
+
+The error page uses an image from the package. Publish it once (and after updating the package):
+
+```bash
+php artisan vendor:publish --tag=murugo-public
+```
+
+To do it automatically, add it to **your app's** `composer.json` (scripts in the package's own
+`composer.json` don't run in your app):
+
+```json
+"scripts": {
+    "post-update-cmd": [
+        "@php artisan vendor:publish --tag=murugo-public --force"
+    ]
+}
+```
+
+#### 12. Tests (package development)
+
+```bash
+composer require --dev orchestra/testbench phpunit/phpunit
+composer test
+```
+
 ## Follow RwandaBuild bellow and contact us
 
 - [Rwanda Build Website](https://rwandabuildprogram.com/)
