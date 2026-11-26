@@ -13,6 +13,13 @@ class MurugoUser extends Model
 
     protected $appends = ['original_murugo_uuid'];
 
+    /**
+     * S-08: the user's Murugo tokens never go out with toArray() / toJson() (API responses,
+     * Inertia / Livewire props, logs of a model). Server code still reads $murugoUser->token.
+     * If you really must send one, call makeVisible('token') on purpose.
+     */
+    protected $hidden = ['token', 'refresh_token'];
+
     public function user()
     {
         $userModel = '\App\User';

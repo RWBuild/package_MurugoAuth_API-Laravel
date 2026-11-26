@@ -187,6 +187,10 @@ public function logout(Request $request)
 If the stored access token has expired, it is refreshed once before logging out. Even when Murugo
 can't be reached, call your own logout afterwards: the local tokens are cleared either way.
 
+#### Tokens are hidden from JSON
+
+`MurugoUser`'s `token` and `refresh_token` are in `$hidden`: they are not included by `toArray()` / `toJson()` (API responses, frontend props, a `User` with `murugoUser` loaded). Server code still reads `$murugoUser->token`. If you really need one in a response, use `$murugoUser->makeVisible('token')` on purpose.
+
 #### 11. Publish the package assets
 
 The error page uses an image from the package. Publish it once (and after updating the package):
