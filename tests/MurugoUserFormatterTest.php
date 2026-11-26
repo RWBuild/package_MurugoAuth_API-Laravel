@@ -90,4 +90,20 @@ class MurugoUserFormatterTest extends TestCase
         $this->assertSame('h-6', $user->murugo_user_id);
         $this->assertSame('global-6', $user->getMurugoUUID());
     }
+
+    public function test_login_still_works_when_the_cache_cannot_lock()
+    {
+        // like an app with CACHE_DRIVER=database but no `cache_locks` table
+        config(['cache.stores.database' => ['driver' => 'database', 'table' => 'cache', 'connection' => 'testing', 'lock_connection' => 'testing', 'lock_table' => 'cache_locks']]);
+        config(['cache.default' => 'database']);
+        app('cache')->forgetDriver('database');
+        Log::spy();
+
+        $user = MurugoUserFormatter::get(...$this->bundle('h-7', 'Fay'));
+
+        $this->assertSame(1, $this->rows('h-7'));
+        $this->assertSame('Fay', $user->name);
+        Log::shouldHaveReceived('warning')->once()
+            ->withArgs(fn ($message) => str_contains($message, 'lock unavailable'));
+    }
 }

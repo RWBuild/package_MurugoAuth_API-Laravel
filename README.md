@@ -24,11 +24,15 @@ First Party applications can authenticate via browser without saving user sessio
         'client_id' => env('MURUGO_CLIENT_ID'),
         'client_secret' => env('MURUGO_CLIENT_SECRET'),
         'redirect' => env('APP_REDIRECT_URL', 'YOUR LOGIN REDIRECT URL'),
-        'murugo_url' => env('MURUGO_URL', 'MURUGO_URL'),
+        'murugo_url' => env('MURUGO_URL'),          // e.g. https://murugo.cloud (with or without a trailing slash)
         'murugo_app_key' => env('MURUGO_APP_KEY'),
-        'disable_user_session' => true|false
+        'disable_user_session' => true|false,
+        'connect_timeout' => 5,                       // optional, seconds (default 5)
+        'timeout' => 15,                              // optional, seconds per request to Murugo (default 15)
     ],
 ```
+
+Requests to Murugo give up after `timeout` seconds; the user then sees "Murugo is unreachable right now" (`MurugoAuthException`, status 503). If `murugo_url` is missing or not an http(s) URL, the package logs an error and throws `MurugoAuthException` (status 500) instead of calling a wrong address.
 
 #### 3. Don't forget to publish your migration by running the following command, when you want to upgrade
 ```json

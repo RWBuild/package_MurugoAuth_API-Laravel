@@ -76,7 +76,11 @@ class MurugoAuthHandler
     {
         $this->appInfo = config('services.murugo');
         $this->request = request();
-        $this->httpClient = static::$httpClientOverride ?: new Client;
+        $this->httpClient = static::$httpClientOverride ?: new Client([
+            // S-11: never wait forever for Murugo (Guzzle's default is no timeout)
+            'connect_timeout' => (float) ($this->appInfo['connect_timeout'] ?? 5),
+            'timeout' => (float) ($this->appInfo['timeout'] ?? 15),
+        ]);
 
         $this->disableUserSession = config('services.murugo.disable_user_session') ?? false;
     }
@@ -106,7 +110,7 @@ class MurugoAuthHandler
             ? '/oauth/authorize-first-party?'
             : '/oauth/authorize?';
 
-        return redirect()->away($auth->appInfo['murugo_url'] . $authorizeURL . $query);
+        return redirect()->away($auth->murugoUrl($authorizeURL) . $query);
     }
 
     /**
@@ -176,7 +180,7 @@ class MurugoAuthHandler
      */
     public function requestUserToken()
     {
-        $url = $this->appInfo['murugo_url'] . '/oauth/token';
+        $url = $this->murugoUrl('/oauth/token');
 
         try {
             $response = $this->httpClient->post($url, [
@@ -212,13 +216,14 @@ class MurugoAuthHandler
      */
     public static function userFromToken(array $userTokens, $userCallback = null)
     {
-        $url = self::init()->appInfo['murugo_url'] . '/api/thirdparty-me';
+        $auth = self::init();
+        $url = $auth->murugoUrl('/api/thirdparty-me');
 
         try {
-            $response = self::init()->httpClient->get($url, [
+            $response = $auth->httpClient->get($url, [
                 'headers' => [
                     'accept' => 'application/json',
-                    'APPKEY' => self::init()->appInfo['murugo_app_key'],
+                    'APPKEY' => $auth->appInfo['murugo_app_key'],
                     'Authorization' => 'Bearer ' . $userTokens['access_token']
                 ]
             ]);
@@ -279,9 +284,13 @@ class MurugoAuthHandler
     {
         try {
             $auth = self::init();
-            $url = $auth->appInfo['murugo_url'] . '/oauth/token';
+            $url = $auth->murugoUrl('/oauth/token');
 
             $response = $auth->httpClient->post($url, [
+                'headers' => [
+                    'accept' => 'application/json',
+                    'APPKEY' => $auth->appInfo['murugo_app_key'],
+                ],
                 'form_params' => [
                     'grant_type' => 'refresh_token',
                     'refresh_token' => $murugoUser->refresh_token,
@@ -346,13 +355,32 @@ class MurugoAuthHandler
      */
     private function requestSsoLogout($accessToken)
     {
-        return $this->httpClient->post($this->appInfo['murugo_url'] . '/api/thirdparty-sso-logout', [
+        return $this->httpClient->post($this->murugoUrl('/api/thirdparty-sso-logout'), [
             'headers' => [
                 'accept' => 'application/json',
                 'APPKEY' => $this->appInfo['murugo_app_key'],
                 'Authorization' => 'Bearer ' . $accessToken,
             ],
         ]);
+    }
+
+    /**
+     * S-11: full Murugo URL for $path, joined the same way everywhere (a trailing slash on
+     * MURUGO_URL or a missing one on $path gives one slash). Fails clearly when MURUGO_URL is
+     * not set to an http(s) URL, instead of sending requests to a relative or made-up address.
+     * @throws MurugoAuthException
+     */
+    public function murugoUrl(string $path = ''): string
+    {
+        $base = rtrim(trim((string) ($this->appInfo['murugo_url'] ?? '')), '/');
+
+        if (!preg_match('#^https?://[^/?\#\s]+#i', $base)) {
+            Log::error('Murugo Auth: services.murugo.murugo_url (MURUGO_URL) is missing or is not an http(s) URL');
+
+            throw new MurugoAuthException('Murugo login is not available right now. Please try again later.', 500);
+        }
+
+        return $path === '' ? $base : $base . '/' . ltrim($path, '/');
     }
 
     /**
